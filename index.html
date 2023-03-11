@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Gamerzer : Gamers Enery Dose</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
+		<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js" async></script>
+		<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
+		<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" async defer></script>
+		<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
+		<script type="module" src="scripts/main.js" async defer></script>
+		<link rel="stylesheet" href="styles/look.css" />
+	</head>
+	<body class="loading">
+		<div id="loader-fpg"></div>
+		<div id="if-loader">
+			<div class="inner rotate-one"></div>
+			<div class="inner rotate-two"></div>
+			<div class="inner rotate-three"></div>
+		</div>
+		<header>
+			<a class="logo"><img alt="Gamerzer Logo" src="Icon.png">Gamerzer</a>
+			<b class="subhead">
+				Feel The Game & Fuel Yourself&nbsp;
+				<b class="author">RISHABH KUMAR (MVIT)</b>
+			</b>
+		</header>
+		<div id="sandwich">
+			<!-- #region Auth form -->
+			<div id="authform" class="section">
+				<div class="container">
+					<div class="row full-height justify-content-center">
+						<div class="col-12 text-center align-self-center">
+							<div class="section pt-sm-2 text-center">
+								<h6 class="mb-0 pb-3">
+									<span>Log In </span>
+									<span>Sign Up</span>
+								</h6>
+								<input class="checkbox" type="checkbox" id="reg-log" name="reg-log" />
+								<label for="reg-log"></label>
+								<div class="card-3d-wrap mx-auto">
+									<div class="card-3d-wrapper">
+										<div class="card-front">
+											<div class="center-wrap">
+												<div class="section text-center">
+													<h4 class="mb-4 pb-3">Log In</h4>
+													<div class="form-group">
+														<input type="email" name="lemail" class="form-style" placeholder="Your Email" id="lemail" autocomplete="off">
+														<i class="input-icon uil uil-at"></i>
+													</div>
+													<div class="form-group mt-2">
+														<input type="password" name="lpass" class="form-style" placeholder="Your Password" id="lpass" autocomplete="off">
+														<i class="input-icon uil uil-lock-alt"></i>
+													</div>
+													<a href="#" class="btn mt-4">submit</a>
+													<p class="mb-0 mt-4 text-center">
+														<a href="#0" class="link">Forgot your password?</a>
+													</p>
+												</div>
+											</div>
+										</div>
+										<div class="card-back">
+											<div class="center-wrap">
+												<div class="section text-center">
+													<h4 class="mb-4 pb-3">Sign Up</h4>
+													<div class="form-group">
+														<input type="text" name="sname" class="form-style" placeholder="Your Name" id="sname" autocomplete="off">
+														<i class="input-icon uil uil-user"></i>
+													</div>
+													<div class="form-group mt-2">
+														<input type="email" name="semail" class="form-style" placeholder="Your Email" id="semail" autocomplete="off">
+														<i class="input-icon uil uil-at"></i>
+													</div>
+													<div class="form-group mt-2">
+														<input type="password" name="spass" class="form-style" placeholder="New Password" id="spass" autocomplete="off">
+														<i class="input-icon uil uil-lock-alt"></i>
+													</div>
+													<div class="form-group mt-2">
+														<input type="password" name="saccess" class="form-style" placeholder="Access Code" id="saccess" autocomplete="off">
+														<i class="input-icon uil uil-shield-question"></i>
+													</div>
+													<a href="#" class="btn mt-4">submit</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- #endregion -->
+			<!-- #region Dashboard -->
+			<div id="dash" class="out-stage">
+				<div class="top-bar">
+					<div class="settings">
+						<i class="input-icon uil uil-setting"></i>
+					</div>
+					<div class="name">
+						<b>User Name</b>
+					</div>
+					<div class="logout">
+						<i class="input-icon uil uil-sign-out-alt"></i>
+					</div>
+				</div>
+				<div class="games">
+					<div class="gcard" style="--gc-clrA: #ff2ae094; --gc-clrB: #645bf6a8; --gc-bs: rgba(255, 110, 243, 0.8);">
+						<div class="icon"><img src="media/rmcs.jpg" alt="Raja Mantri Chor Sipahi"></div>
+						<div class="data">
+							A traditional Indian card game having four cards named Raja, Mantri, Chor & Sipahi,
+							shuffled and distributed to players, one who gets Sipahi have to guess who is the Chor(Thief).
+						</div>
+					</div>
+					<div class="gcard" style="--gc-clrA: #ffed61b9; --gc-clrB: #f321d7af; --gc-bs: rgba(255, 243, 110, 0.8);">
+						<div class="icon"><img src="media/bingo.png" alt="Raja Mantri Chor Sipahi"></div>
+						<div class="data">
+							Bingo is played with two or more players is a board game whose origin is British,
+							Random no from 1 to 25 is drawn on 5 by 5 board and played turn wise between each player.
+						</div>
+					</div>
+					<div class="gcard" style="--gc-clrA: #24ff71c0; --gc-clrB: #9b4effb7; --gc-bs: rgba(110, 255, 144, 0.8);">
+						<div class="icon"><img src="media/tic-tac-toe.png" alt="Raja Mantri Chor Sipahi"></div>
+						<div class="data">
+							A popular American game also known as Noughts & Crosses is played between two players.
+							It's played turm-wise by placing 'X' or 'O' on 3 by 3 board.
+						</div>
+					</div>
+				</div>
+				<div class="stats"></div>
+			</div>
+			<!-- #endregion -->
+			<div id="spinner-box" style="display: none;">
+				<div class="configure-border-1">  
+					<div class="configure-core"></div>
+				</div>  
+				<div class="configure-border-2">
+					<div class="configure-core"></div>
+				</div> 
+			</div>
+		</div>
+		<footer>
+			Made with&nbsp;
+			<svg width="20" height="20" viewBox="0 -10 497 470" id="heart">
+			<path d="M140 20C73 20 20 74 20 140c0 135 136 170 228 303 88-132 229-173 229-303 0-66-54-120-120-120-48 0-90 28-109 69-19-41-60-69-108-69z" stroke-width="50" fill="none"></path>
+			<defs>
+			<radialGradient id="radialGradient" cx="50%" cy="50%" r="100%" gradientUnits="objectBoundingBox">
+			<stop offset="1%" style="stop-color:rgb(255, 150, 150); stop-opacity:1"></stop>
+			<stop offset="90%" style="stop-color:rgb(255, 0, 0); stop-opacity:1"></stop>
+			<stop offset="100%" style="stop-color:rgb(208, 46, 46); stop-opacity:1"></stop>
+			</radialGradient>
+			</defs>
+			<style type="text/css">#heart{stroke:url(#radialGradient);}</style>
+			</svg>&nbsp;In&nbsp;
+			<svg viewBox="0 0 225 150" width="30" height="20" id="tri-color">
+			<rect width="225" height="150" fill="#f93"></rect>
+			<rect width="225" height="50" y="50" fill="#fff"></rect>
+			<rect width="225" height="50" y="100" fill="#128807"></rect>
+			<g transform="translate(112.5,75)">
+			<circle r="20" fill="#008"></circle>
+			<circle r="17.5" fill="#fff"></circle>
+			<circle r="3.5" fill="#008"></circle>
+			<g id="d">
+			<g id="c">
+			<g id="b">
+			<g id="a">
+			<circle r="0.875" fill="#008" transform="rotate(7.5) translate(17.5)"></circle>
+			<path fill="#008" d="M 0,17.5 0.6,7 C 0.6,7 0,2 0,2 0,2 -0.6,7 -0.6,7 L 0,17.5 z"></path>
+			</g>
+			<use xlink:href="#a" transform="rotate(15)"></use>
+			</g>
+			<use xlink:href="#b" transform="rotate(30)"></use>
+			</g>
+			<use xlink:href="#c" transform="rotate(60)"></use>
+			</g>
+			<use xlink:href="#d" transform="rotate(120)"></use>
+			<use xlink:href="#d" transform="rotate(-120)"></use>
+			</g>
+			</svg>
+		</footer>
+	</body>
+</html>
