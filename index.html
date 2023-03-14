@@ -6,8 +6,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
-		<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js" async></script>
-		<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
 		<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js" async defer></script>
 		<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
@@ -116,21 +114,74 @@
 						</div>
 					</div>
 					<div class="gcard" style="--gc-clrA: #ffed61b9; --gc-clrB: #f321d7af; --gc-bs: rgba(255, 243, 110, 0.8);">
-						<div class="icon"><img src="media/bingo.png" alt="Raja Mantri Chor Sipahi"></div>
+						<div class="icon"><img src="media/bingo.png" alt="Bingo Game"></div>
 						<div class="data">
 							Bingo is played with two or more players is a board game whose origin is British,
 							Random no from 1 to 25 is drawn on 5 by 5 board and played turn wise between each player.
 						</div>
 					</div>
 					<div class="gcard" style="--gc-clrA: #24ff71c0; --gc-clrB: #9b4effb7; --gc-bs: rgba(110, 255, 144, 0.8);">
-						<div class="icon"><img src="media/tic-tac-toe.png" alt="Raja Mantri Chor Sipahi"></div>
+						<div class="icon"><img src="media/tic-tac-toe.png" alt="Tic Tac Toe"></div>
 						<div class="data">
 							A popular American game also known as Noughts & Crosses is played between two players.
 							It's played turm-wise by placing 'X' or 'O' on 3 by 3 board.
 						</div>
 					</div>
 				</div>
-				<div class="stats"></div>
+				<div class="stats">
+					<main class="table">
+						<section class="table__header">
+							<div class="input-group">
+								<input type="search" placeholder="Search Data...">
+							</div>
+							<div class="export__file">
+								<label for="export-file" class="export__file-btn" title="Export File"></label>
+								<input type="checkbox" id="export-file">
+								<div class="export__file-options">
+									<label>Export As &nbsp; &#10140;</label>
+									<label for="export-file" id="toPDF">PDF <img src="media/pdf.png" alt=""></label>
+									<label for="export-file" id="toJSON">JSON <img src="media/json.png" alt=""></label>
+								</div>
+							</div>
+						</section>
+						<section class="table__body">
+							<table>
+								<thead>
+									<tr>
+										<th> Id <span class="icon-arrow">&UpArrow;</span></th>
+										<th> Game <span class="icon-arrow">&UpArrow;</span></th>
+										<th> Duration <span class="icon-arrow">&UpArrow;</span></th>
+										<th> Date <span class="icon-arrow">&UpArrow;</span></th>
+										<th> Status <span class="icon-arrow">&UpArrow;</span></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>1</td>
+										<td>Tic Tac Toe</td>
+										<td>3.2 min</td>
+										<td>17 Dec, 2022</td>
+										<td><p class="status won">Won</p></td>
+									</tr>
+									<tr>
+										<td>2</td>
+										<td>Bingo</td>
+										<td>2 min</td>
+										<td>27 Aug, 2023</td>
+										<td><p class="status lost">Lost</p></td>
+									</tr>
+									<tr>
+										<td>3</td>
+										<td>Raja Mantri Chor Sipahi</td>
+										<td>10 min</td>
+										<td>14 Mar, 2023</td>
+										<td><p class="status tie">Tie</p></td>
+									</tr>
+								</tbody>
+							</table>
+						</section>
+					</main>
+				</div>
 			</div>
 			<!-- #endregion -->
 			<div id="spinner-box" style="display: none;">

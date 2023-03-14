@@ -1,5 +1,5 @@
-const productionSvr = 'wss://app-name.koyeb.app'; // [To-Do] Change it
-const localSvr = `ws://${location.host}:8080`;
+const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
+const localSvr = `ws://${location.host}:8844`;
 const isProd = false;
 let svr;
 
