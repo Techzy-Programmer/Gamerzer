@@ -638,11 +638,15 @@ body > header.sticky .subhead .author
 	color: #89ffe39a;
 	font-size: var(--fs-tnm);
 }
+#dash .top-bar .logout, #dash .top-bar .settings {
+	cursor: pointer;
+}
 
 #dash .games {
 	width: 100%;
 	display: flex;
 	flex-wrap: wrap;
+	margin: 25px 0px;
 	user-select: none;
 	flex-direction: row;
 	justify-content: space-evenly;
@@ -658,13 +662,13 @@ body > header.sticky .subhead .author
 	height: 300px;
 	margin: 15px;
 	overflow: hidden;
-	width: calc(100% - 80px);
+	width: calc(100% - 60px);
 	background: #49adff;
 	border-radius: 10px;
-	transform: skew(4deg, 4deg);
+	transform: skew(2deg, 2deg);
 	border-bottom-left-radius: 160px;
 	border-bottom-right-radius: 160px;
-	transition: transform 0.3s ease-in-out;
+	transition: transform 0.2s ease-in-out;
 	background: linear-gradient(to bottom, var(--gc-clrA), var(--gc-clrB));
 	box-shadow: 0 5px 1px #fffc, inset 0 -5px 5px rgb(196 59 255 / 25%), 0 10px 0 rgb(0 0 0 / 15%), -6px -4px 10px -2px var(--gc-bs);
 }
@@ -684,8 +688,6 @@ body > header.sticky .subhead .author
 
 #dash .gcard .icon {
 	position: relative;
-	width: 100px;
-	height: 90px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -702,11 +704,9 @@ body > header.sticky .subhead .author
 	position: relative;
 	border-bottom-left-radius: 50%;
 	border-bottom-right-radius: 50%;
-	transition: transform 0.3s ease-in-out;
-	transform: skew(-4deg, -4deg) perspective(50px);
 }
 
-#dash .gcard:hover, #dash .gcard:hover .icon img {
+#dash .gcard:hover{
 	transform: skew(0deg, 0deg);
 }
 
@@ -723,6 +723,7 @@ body > header.sticky .subhead .author
 #dash main.table {
     width: calc(100vw - 10px);
 	padding: 10px;
+	display: none;
     background-color: #fff5;
     backdrop-filter: blur(7px);
     box-shadow: 0 .4rem .8rem #0005;
