@@ -1,9 +1,18 @@
 import { UI, wait } from "./ui.js";
 import { Master } from "./master.js";
 import { initTable } from "./table.js";
+// import { State } from "./state.js";
+import { Utils } from "./utils.js";
 
 Master.connect();
 initTable();
+
+// UI Testing ---
+
+// UI.loadDashboard();
+// UI.setLoader(false);
+
+// Remove above code when testing done.....
 
 $('#signupBtn').click(async (e) => {
     e.preventDefault();
@@ -55,4 +64,35 @@ $('#authform input.form-style').keypress(function(e) {
         if (nameAttr == "lpass") $('#loginBtn').click();
         else if (nameAttr == "saccess") $('#signupBtn').click();
     }
+});
+
+$('#dash .games > .gcard').click(async e => {
+    const target = $(e.currentTarget),
+        gcode = target.attr('data-gcode'),
+        gname = target.attr('data-gname'),
+
+        pmap = { // [To-Do] Take players count as input from user for each game
+            'rmcs': 4,
+            'bgo': 2,
+            'ttt': 2,
+            'uno': 6
+        };
+    
+    UI.setLoader(true);
+    await wait(500);
+    UI.initLobby(gname);
+    Master.send("Search", {
+        plrCount: pmap[gcode],
+        gameId: gcode
+    });
+
+    Utils.setFallback('lobby');
+});
+
+$('#lobby button').click(async e => {
+    e.preventDefault();
+    UI.setLoader(true);
+    await wait(500);
+    Master.send("Cancel-Search");
+    Utils.setFallback('dash');
 });

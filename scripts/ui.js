@@ -1,3 +1,5 @@
+import { State } from "./state.js";
+
 let activeScene = 0;
 let sceneMap = {
     0: $('div#sandwich > #authform'),
@@ -16,9 +18,28 @@ export class UI {
         await showScene(1);
     }
 
-    static async loadMatchMaker() {
+    static async loadLobby() {
+        const schTxt = sceneMap[2].find('.text');
+        const typeTxt = "Searching For Players";
+        let tmpTxt = "";
+        schTxt.text("");
+
         await hideScene();
-        await showScene(1);
+        await showScene(2);
+        this.setLoader(false);
+        await wait(400);
+
+        for (let i = 0; i < typeTxt.length; i++) {
+            const typeChar = typeTxt[i];
+            tmpTxt += typeChar;
+            schTxt.text(tmpTxt);
+            await wait(40);
+        }
+
+        if (typeof State.cBack.lobby == 'function') {
+            await wait(500);
+            State.cBack.lobby();
+        }
     }
 
     static async loadGame(game) {
@@ -31,6 +52,18 @@ export class UI {
             default:
                 break;
         }
+    }
+
+    static async populateLobby(ids) {
+        let i = 0;
+        ids.forEach(async id => {
+            const newUserEl = $('<b/>', { 'class': id });
+            newUserEl.text(State.players[id].name);
+            $('#lobby .players').append(newUserEl);
+            await wait((i++) * 300);
+            await wait(20);
+            newUserEl.addClass('show');
+        });
     }
 
     static setLoader(toShow) {
@@ -70,6 +103,13 @@ export class UI {
                 "transition": "all .4s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
             }
         }).showToast();
+    }
+
+    static initLobby(gname) {
+        sceneMap[2].find('i.gname').text(gname);
+        sceneMap[2].find('.players').empty();
+        sceneMap[2].find('.players').append($('<b>', { class: 'me show' }));
+        sceneMap[2].find('b.me').text(`${State.me.name}`);
     }
 }
 

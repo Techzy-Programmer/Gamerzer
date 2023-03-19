@@ -105,28 +105,28 @@
 					</div>
 				</div>
 				<div class="games">
-					<div class="gcard" style="--gc-clrA: #ff2ae094; --gc-clrB: #645bf6a8; --gc-bs: rgba(255, 110, 243, 0.8);">
+					<div class="gcard" data-gcode="rmcs" data-gname="Raja Mantri Chor Sipahi" style="--gc-clrA: #ff2ae094; --gc-clrB: #645bf6a8; --gc-bs: rgba(255, 110, 243, 0.8);">
 						<div class="icon"><img src="media/raja-mantri-chor-sipahi.jpg" alt="Raja Mantri Chor Sipahi"></div>
 						<div class="data">
 							A traditional Indian card game having four cards named Raja, Mantri, Chor & Sipahi,
 							shuffled and distributed to players, one who gets Sipahi have to guess who is the Chor(Thief).
 						</div>
 					</div>
-					<div class="gcard" style="--gc-clrA: #ffed61b9; --gc-clrB: #f321d7af; --gc-bs: rgba(255, 243, 110, 0.8);">
+					<div class="gcard" data-gcode="bgo" data-gname="Bingo" style="--gc-clrA: #ffed61b9; --gc-clrB: #f321d7af; --gc-bs: rgba(255, 243, 110, 0.8);">
 						<div class="icon"><img src="media/bingo.png" alt="Bingo Game"></div>
 						<div class="data">
 							Bingo played by two or more players is a board game whose origin is British,
 							Random no from 1 to 25 is drawn on 5 by 5 board and played turn wise between each player.
 						</div>
 					</div>
-					<div class="gcard" style="--gc-clrA: #24ff71c0; --gc-clrB: #9b4effb7; --gc-bs: rgba(110, 255, 144, 0.8);">
+					<div class="gcard" data-gcode="ttt" data-gname="Tic Tac Toe" style="--gc-clrA: #24ff71c0; --gc-clrB: #9b4effb7; --gc-bs: rgba(110, 255, 144, 0.8);">
 						<div class="icon"><img src="media/tic-tac-toe.png" alt="Tic Tac Toe"></div>
 						<div class="data">
 							A popular American game also known as Noughts & Crosses is played between two players.
 							It's played turm-wise by placing 'X' or 'O' on 3 by 3 board.
 						</div>
 					</div>
-					<div class="gcard" style="--gc-clrA: #734d4dc0; --gc-clrB: #251f1ab7; --gc-bs: rgba(255, 211, 211, 0.8);">
+					<div class="gcard" data-gcode="uno" data-gname="UNO Game" style="--gc-clrA: #734d4dc0; --gc-clrB: #251f1ab7; --gc-bs: rgba(255, 211, 211, 0.8);">
 						<div class="icon"><img src="media/uno.jpg" alt="UNO Game"></div>
 						<div class="data">
 							UNO is an American shedding-type card game that is played with a specially printed deck.
@@ -178,14 +178,23 @@
 				</div>
 			</div>
 			<!-- #endregion -->
-			<div id="spinner-box" style="display: none;">
-				<div class="configure-border-1">  
-					<div class="configure-core"></div>
-				</div>  
-				<div class="configure-border-2">
-					<div class="configure-core"></div>
-				</div> 
+			<!-- #region Lobby -->
+			<div id="lobby" class="out-stage">
+				<data class="text"></data>
+				<i class="gname"></i>
+				<div class="spinner-box">
+					<div class="configure-border-1">
+						<div class="configure-core"></div>
+					</div>
+					<div class="configure-border-2">
+						<div class="configure-core"></div>
+					</div>
+				</div>
+				<button><i class="input-icon uil uil-backward"></i>Go Back</button>
+				<div class="players">
+				</div>
 			</div>
+			<!-- #endregion -->
 		</div>
 		<footer>
 			Made with&nbsp;
@@ -228,5 +237,6 @@
 		</footer>
 
 		<script type="module" src="scripts/main.js"></script>
+		<!-- Icons Store => https://icon-sets.iconify.design/uil/ -->
 	</body>
 </html>

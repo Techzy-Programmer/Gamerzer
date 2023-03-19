@@ -1,9 +1,11 @@
 import { UI, wait } from "./ui.js";
+import { State } from "./state.js";
+import { Player } from "./player.js";
 
 const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
-let loggedIn = false;
+let pingIOut = 0;
 let svr;
 
 export class Master {
@@ -16,19 +18,37 @@ export class Master {
             const sess = localStorage.getItem('User-Session');
             if (sess != null) this.send("Login", { sess });
             else UI.setLoader(false);
+            pingIOut = setInterval(() =>
+                svr.readyState == 1 && svr.send('Ping'), 4 * 1000);
         });
 
         svr.addEventListener('message', async (event) => {
-            const msg = JSON.parse(event.data);
+            const strData = event.data.toString();
+            if (strData == 'Pong') return;
+            const msg = JSON.parse(strData);
             const data = msg.data;
 
             switch (msg.type) {
                 case 'Logged-In':
+                    data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
                     localStorage.setItem('User-Session', data.session);
+                    State.me = new Player(data.id, data.name, 'idle');
                     UI.showToast(`Welcome ${data.name}`);
                     await UI.loadDashboard();
+                    State.loggedIn = true;
                     UI.setLoader(false);
-                    loggedIn = true;
+                    break;
+
+                case 'Joined':
+                    if (State.me.status != 'playing') UI.showToast(`${data.name} Joined`); // Don't distract player while gameplay
+                    State.players[data.id] = new Player(data.id, data.name, 'idle');
+                    break;
+
+                case 'Left':
+                    if (data.id in State.players) {
+                        if (State.me.status != 'playing') UI.showToast(`${State.players[data.id].name} Left`, 'w');
+                        delete State.players[data.id];
+                    }
                     break;
 
                 case 'Statistics':
@@ -39,10 +59,39 @@ export class Master {
                     */
                     break;
 
-                case '':
+                case 'Goto-Lobby':
+                    clearTimeout(State.tOut.lobby);
+                    await UI.loadLobby(); // Loader get closed by this function itself
                     break;
 
-                case '':
+                case 'In-Lobby':
+                    State.cBack['lobby'] = () => UI.populateLobby(data.ids);
+                    break;
+
+                case 'New-Opponent':
+                    UI.populateLobby([data.id]);
+                    break;
+
+                case 'Match-Making-Left':
+                    const remPlrElem = $(`#lobby .players > b.show.${data.id}`);
+                    remPlrElem.removeClass('show');
+                    await wait(340);
+                    remPlrElem.remove();
+                    break;
+
+                case 'Search-Cancelled':
+                    clearTimeout(State.tOut.dash);
+                    await UI.loadDashboard();
+                    UI.setLoader(false);
+                    break;
+
+                case 'Session-Cancelled':
+                    // [To-Do] Don't try auto reconnection here
+                    State.loggedIn = false;
+                    UI.setLoader(true);
+                    await UI.loadAuth();
+                    UI.setLoader(false);
+                    UI.showToast('Session opened in another tab', 'w', 0);
                     break;
 
                 case 'Pong':
@@ -60,13 +109,13 @@ export class Master {
         });
 
         svr.addEventListener('close', async () => {
-            loggedIn = false;
+            State.loggedIn = false;
             if (await checkOnline() && isProd) this.connect();
         });
 
         svr.addEventListener('error', async (erEvt) => {
-            loggedIn = false;
             UI.showToast("Error in connecting with server", 'e', 6);
+            State.loggedIn = false;
 
             if (svr.readyState != 1)
                 if (await checkOnline() && isProd)
