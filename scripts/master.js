@@ -169,6 +169,6 @@ async function onDisconnection(popType) {
     if (svr.readyState != 1)
         if (!isRetryDisabled &&
             isProd && await checkOnline())
-                this.connect(); // Retry connection
+                Master.connect(); // Retry connection
         else UI.setLoader(false);
 }
