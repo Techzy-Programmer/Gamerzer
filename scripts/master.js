@@ -5,6 +5,7 @@ import { Player } from "./player.js";
 const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
+let isRetryDisabled = false;
 let pingIOut = 0;
 let svr;
 
@@ -33,8 +34,12 @@ export class Master {
                     data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
                     localStorage.setItem('User-Session', data.session);
                     State.me = new Player(data.id, data.name, 'idle');
-                    UI.showToast(`Welcome ${data.name}`);
-                    await UI.loadDashboard();
+                    
+                    if (UI.getScene() === 0) {
+                        UI.showToast(`Welcome ${data.name}`);
+                        await UI.loadDashboard();
+                    }
+
                     State.loggedIn = true;
                     UI.setLoader(false);
                     break;
@@ -60,7 +65,6 @@ export class Master {
                     break;
 
                 case 'Goto-Lobby':
-                    clearTimeout(State.tOut.lobby);
                     await UI.loadLobby(); // Loader get closed by this function itself
                     break;
 
@@ -80,13 +84,12 @@ export class Master {
                     break;
 
                 case 'Search-Cancelled':
-                    clearTimeout(State.tOut.dash);
                     await UI.loadDashboard();
                     UI.setLoader(false);
                     break;
 
                 case 'Session-Cancelled':
-                    // [To-Do] Don't try auto reconnection here
+                    isRetryDisabled = true;
                     State.loggedIn = false;
                     UI.setLoader(true);
                     await UI.loadAuth();
@@ -95,6 +98,15 @@ export class Master {
                     break;
 
                 case 'Pong':
+                    break;
+
+                case 'Blocked':
+                    UI.showToast("You are blocked by Admin!", 'w');
+                    localStorage.clear();
+                    UI.setLoader(true, "blocked-i5r0");
+                    await wait(1000);
+                    await UI.loadAuth();
+                    UI.setLoader(false, "blocked-i5r0");
                     break;
 
                 case 'Warn': case 'Error':
@@ -108,19 +120,8 @@ export class Master {
             }
         });
 
-        svr.addEventListener('close', async () => {
-            State.loggedIn = false;
-            if (await checkOnline() && isProd) this.connect();
-        });
-
-        svr.addEventListener('error', async (erEvt) => {
-            UI.showToast("Error in connecting with server", 'e', 6);
-            State.loggedIn = false;
-
-            if (svr.readyState != 1)
-                if (await checkOnline() && isProd)
-                    this.connect(); // Retry connection
-        });
+        svr.addEventListener('close', async () => onDisconnection(0));
+        svr.addEventListener('error', async () => onDisconnection(1));
     }
 
     static send(type, data) {
@@ -129,6 +130,7 @@ export class Master {
             svr.send(JSON.stringify(msg));
         }
         else {
+            UI.showToast("Something went wrong :(");
             UI.setLoader(false);
         }
     }
@@ -136,19 +138,37 @@ export class Master {
 
 async function checkOnline() {
     let notified = false;
+    let dispToast;
 
     while (true) {
         try {
             await fetch('./media/ping.png', { cache: 'no-store' });
+            dispToast?.hideToast();
             return true;
         }
         catch { }
-
+        
         if (!notified) {
-            UI.showToast('You are offline!', 'w', 5);
+            UI.setLoader(true);
+            dispToast = UI.showToast('You are offline! Waiting for Internet connection...', 'w', 0, false);
             notified = true;
         }
 
+        if (isRetryDisabled) return false;
         await wait(5000);
     }
+}
+
+async function onDisconnection(popType) {
+    if (popType == 0) UI.showToast("Disconnected from server!", 'e');
+    else UI.showToast("Error connecting to server!", 'e');
+    if (UI.getScene() == 2) await UI.loadDashboard();
+    clearInterval(pingIOut);
+
+    State.loggedIn = false;
+    if (svr.readyState != 1)
+        if (!isRetryDisabled &&
+            isProd && await checkOnline())
+                this.connect(); // Retry connection
+        else UI.setLoader(false);
 }

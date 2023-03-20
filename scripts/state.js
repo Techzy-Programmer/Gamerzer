@@ -1,13 +1,11 @@
 import { Player } from "./player.js";
 
 export class State {
-    static tOut = {};
     static cBack = {};
     static loggedIn = false;
     static me = new Player();
 
     static players = {
-        "-1": new Player(),
-        1011: new Player(1011, "Test User", 'idle')
+        12345: new Player(12345, "Test User", 'idle') // Just a dummy player for testings
     };
 }

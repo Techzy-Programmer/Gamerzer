@@ -14,11 +14,4 @@ export class Utils {
 
         return mod;
     }
-
-    static setFallback(tOutType) {
-        State.tOut[tOutType] = setTimeout(() => {
-            UI.showToast("Something went wrong :(");
-            UI.setLoader(false);
-        }, 5000);
-    }
 }

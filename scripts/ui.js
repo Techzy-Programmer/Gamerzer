@@ -1,5 +1,6 @@
 import { State } from "./state.js";
 
+let loaderToken = "n/a";
 let activeScene = 0;
 let sceneMap = {
     0: $('div#sandwich > #authform'),
@@ -9,23 +10,32 @@ let sceneMap = {
 
 export class UI {
     static async loadAuth() {
+        const scene = 0;
+        if (scene == activeScene) return;
+        
         await hideScene();
-        await showScene(0);
+        await showScene(scene);
     }
 
     static async loadDashboard() {
+        const scene = 1;
+        if (scene == activeScene) return;
+        
         await hideScene();
-        await showScene(1);
+        await showScene(scene);
     }
 
     static async loadLobby() {
+        const scene = 2;
+        if (scene == activeScene) return;
+        
         const schTxt = sceneMap[2].find('.text');
         const typeTxt = "Searching For Players";
         let tmpTxt = "";
         schTxt.text("");
 
         await hideScene();
-        await showScene(2);
+        await showScene(scene);
         this.setLoader(false);
         await wait(400);
 
@@ -66,12 +76,20 @@ export class UI {
         });
     }
 
-    static setLoader(toShow) {
+    static setLoader(toShow, ownerToken = "n/a") {
+        // ownerToken verifies if caller has enough rights to close the loader
+        if (toShow) loaderToken = ownerToken;
+        else {
+            if (ownerToken != loaderToken) {
+                return;
+            }
+        }
+
         if (!toShow) $('body').removeClass('loading');
         else $('body').addClass('loading');
     }
 
-    static showToast(msg, type = 'i', dur = 4) {
+    static showToast(msg, type = 'i', dur = 4, closable = true) {
         let strBG = '#000000db';
 
         switch (type) {
@@ -86,9 +104,10 @@ export class UI {
                 break;
         }
 
+        const toast =
         Toastify({
             text: msg,
-            close: true,
+            close: closable,
             gravity: 'bottom',
             stopOnFocus: true,
             duration: dur * 1000,
@@ -102,7 +121,10 @@ export class UI {
                 "justify-content": "space-between",
                 "transition": "all .4s cubic-bezier(0.18, 0.89, 0.32, 1.28)"
             }
-        }).showToast();
+        });
+
+        toast.showToast();
+        return toast;
     }
 
     static initLobby(gname) {
@@ -110,6 +132,10 @@ export class UI {
         sceneMap[2].find('.players').empty();
         sceneMap[2].find('.players').append($('<b>', { class: 'me show' }));
         sceneMap[2].find('b.me').text(`${State.me.name}`);
+    }
+
+    static getScene() {
+        return activeScene;
     }
 }
 

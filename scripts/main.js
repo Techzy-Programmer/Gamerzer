@@ -85,8 +85,6 @@ $('#dash .games > .gcard').click(async e => {
         plrCount: pmap[gcode],
         gameId: gcode
     });
-
-    Utils.setFallback('lobby');
 });
 
 $('#lobby button').click(async e => {
@@ -94,5 +92,4 @@ $('#lobby button').click(async e => {
     UI.setLoader(true);
     await wait(500);
     Master.send("Cancel-Search");
-    Utils.setFallback('dash');
 });
