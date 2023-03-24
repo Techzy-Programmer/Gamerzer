@@ -1,3 +1,4 @@
+import { Game } from "./game.js";
 import { State } from "./state.js";
 
 let loaderToken = "n/a";
@@ -29,15 +30,27 @@ export class UI {
         const scene = 2;
         if (scene == activeScene) return;
         
-        const schTxt = sceneMap[2].find('.text');
-        const typeTxt = "Searching For Players";
-        let tmpTxt = "";
-        schTxt.text("");
-
         await hideScene();
         await showScene(scene);
         this.setLoader(false);
         await wait(400);
+
+        await this.typeLobby("Searching For Players");
+        if (typeof State.cBack.lobby == 'function') {
+            State.cBack.lobby();
+            await wait(500);
+        }
+
+        State.hasLobbyInit = true;
+        if (typeof Game.ackCB == 'function') {
+            Game.ackCB();
+        }
+    }
+
+    static async typeLobby(typeTxt) {
+        const schTxt = sceneMap[2].find('.text');
+        let tmpTxt = "";
+        schTxt.text("");
 
         for (let i = 0; i < typeTxt.length; i++) {
             const typeChar = typeTxt[i];
@@ -45,17 +58,13 @@ export class UI {
             schTxt.text(tmpTxt);
             await wait(40);
         }
-
-        if (typeof State.cBack.lobby == 'function') {
-            await wait(500);
-            State.cBack.lobby();
-        }
     }
 
-    static async loadGame(game) {
-        switch (game) {
-            case 'bingo':
-
+    static async loadGame(gcode) {
+        switch (gcode) {
+            case 'rmcs': // Raja Mantri Chor Sipahi
+                // [To-Do] Create UI for rmcs and load lit
+                this.showToast("Moved To Game Scene"); // Dummy test
                 activeScene = 3;
                 break;
 

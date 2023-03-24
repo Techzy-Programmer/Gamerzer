@@ -1,6 +1,7 @@
 import { UI, wait } from "./ui.js";
 import { State } from "./state.js";
 import { Player } from "./player.js";
+import { Game } from "./game.js";
 
 const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
@@ -34,6 +35,7 @@ export class Master {
                     data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
                     localStorage.setItem('User-Session', data.session);
                     State.me = new Player(data.id, data.name, 'idle');
+                    $('#dash .top-bar .name b').text(data.name);
                     
                     if (UI.getScene() === 0) {
                         UI.showToast(`Welcome ${data.name}`);
@@ -65,6 +67,7 @@ export class Master {
                     break;
 
                 case 'Goto-Lobby':
+                    State.hasLobbyInit = false;
                     await UI.loadLobby(); // Loader get closed by this function itself
                     break;
 
@@ -86,6 +89,10 @@ export class Master {
                 case 'Search-Cancelled':
                     await UI.loadDashboard();
                     UI.setLoader(false);
+                    break;
+
+                case "Game-MSG":
+                    Game.processMSG(data);
                     break;
 
                 case 'Session-Cancelled':
@@ -150,7 +157,7 @@ async function checkOnline() {
         
         if (!notified) {
             UI.setLoader(true);
-            dispToast = UI.showToast('You are offline! Waiting for Internet connection...', 'w', 0, false);
+            dispToast = UI.showToast('You are offline!\nWaiting for Internet connection...', 'w', 0, false);
             notified = true;
         }
 

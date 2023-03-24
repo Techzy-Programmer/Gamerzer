@@ -3,6 +3,7 @@ import { Master } from "./master.js";
 import { initTable } from "./table.js";
 // import { State } from "./state.js";
 import { Utils } from "./utils.js";
+import { State } from "./state.js";
 
 Master.connect();
 initTable();
@@ -81,6 +82,8 @@ $('#dash .games > .gcard').click(async e => {
     UI.setLoader(true);
     await wait(500);
     UI.initLobby(gname);
+    State.activeGCode = gcode;
+    
     Master.send("Search", {
         plrCount: pmap[gcode],
         gameId: gcode

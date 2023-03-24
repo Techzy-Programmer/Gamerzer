@@ -27,7 +27,7 @@ const mimeType = {
 	'.ttf': 'application/font-sfnt'
 };
 
-// Creating a server and listening at port 1800
+// Creating a server and listening at port 80
 http.createServer( (req, res) => {
 	// Parsing the requested URL
 	const parsedUrl = url.parse(req.url);
@@ -36,7 +36,7 @@ http.createServer( (req, res) => {
 	/*
         Processing the requested file pathname to
         avoid directory traversal like,
-        http://localhost:1800/../fileOutofContext.txt
+        http://localhost:80/../fileOutofContext.txt
         by limiting to the current directory only.
     */
 
