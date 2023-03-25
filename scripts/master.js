@@ -20,6 +20,8 @@ export class Master {
             const sess = localStorage.getItem('User-Session');
             if (sess != null) this.send("Login", { sess });
             else UI.setLoader(false);
+
+            clearInterval(pingIOut);
             pingIOut = setInterval(() =>
                 svr.readyState == 1 && svr.send('Ping'), 4 * 1000);
         });
@@ -28,7 +30,7 @@ export class Master {
             const strData = event.data.toString();
             if (strData == 'Pong') return;
             const msg = JSON.parse(strData);
-            const data = msg.data;
+            const { data } = msg;
 
             switch (msg.type) {
                 case 'Logged-In':

@@ -1176,7 +1176,9 @@ body > header.sticky .subhead .author
 
 /* #region Raja Mantri Chor Sipahi */
 
-
+#rmcs {
+	display: none;
+}
 
 /* #endregion */
 
