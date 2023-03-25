@@ -8,7 +8,7 @@ const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
 let isDisconnected = true;
-hasNotified = false;
+let hasNotified = false;
 let pingIOut = 0;
 let svr;
 
