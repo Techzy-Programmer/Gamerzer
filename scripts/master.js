@@ -7,6 +7,7 @@ const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
+let isDisconnected = false;
 let pingIOut = 0;
 let svr;
 
@@ -20,6 +21,7 @@ export class Master {
             const sess = localStorage.getItem('User-Session');
             if (sess != null) this.send("Login", { sess });
             else UI.setLoader(false);
+            isDisconnected = false;
 
             clearInterval(pingIOut);
             pingIOut = setInterval(() =>
@@ -134,41 +136,51 @@ export class Master {
     }
 
     static send(type, data) {
-        if (svr && svr.readyState == 1) {
-            const msg = { type, data };
-            svr.send(JSON.stringify(msg));
+        if (!svr || svr.readyState !== 1) {
+          UI.showToast("Something went wrong :(");
+          UI.setLoader(false);
+          return;
         }
-        else {
-            UI.showToast("Something went wrong :(");
-            UI.setLoader(false);
-        }
+    
+        const msg = { type, data };
+        svr.send(JSON.stringify(msg));
     }
 }
 
 async function checkOnline() {
     let notified = false;
+    let caught = false;
     let dispToast;
 
     while (true) {
+        if (isRetryDisabled) return false;
+
+        if ((caught || !navigator.onLine) && !notified) {
+            dispToast = UI.showToast('You are offline!\nWaiting for Internet connection...', 'w', 0, false);
+            UI.setLoader(true);
+            notified = true;
+        }
+
         try {
-            await fetch('./media/ping.png', { cache: 'no-store' });
+            !navigator.onLine && await (new Promise(res => window.addEventListener('online', res)));
+            const fetchController = new AbortController();
+            const signal = fetchController.signal;
+            setTimeout(() => fetchController.abort(), 2000);
+            await fetch('./media/ping.png', { cache: 'no-store', signal });
             dispToast?.hideToast();
             return true;
         }
         catch { }
         
-        if (!notified) {
-            UI.setLoader(true);
-            dispToast = UI.showToast('You are offline!\nWaiting for Internet connection...', 'w', 0, false);
-            notified = true;
-        }
-
-        if (isRetryDisabled) return false;
+        caught = true;
         await wait(5000);
     }
 }
 
 async function onDisconnection(popType) {
+    if (isDisconnected) return;
+    isDisconnected = true;
+
     if (popType == 0) UI.showToast("Disconnected from server!", 'e');
     else UI.showToast("Error connecting to server!", 'e');
     if (UI.getScene() == 2) await UI.loadDashboard();
