@@ -7,12 +7,14 @@ const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
-let isDisconnected = false;
+let isDisconnected = true;
+hasNotified = false;
 let pingIOut = 0;
 let svr;
 
 export class Master {
     static connect() {
+        if (!isDisconnected) return;
         let svrAddress = isProd ? productionSvr : localSvr;
         svr = new WebSocket(svrAddress);
 
@@ -22,6 +24,7 @@ export class Master {
             if (sess != null) this.send("Login", { sess });
             else UI.setLoader(false);
             isDisconnected = false;
+            hasNotified = false;
 
             clearInterval(pingIOut);
             pingIOut = setInterval(() =>
@@ -178,13 +181,16 @@ async function checkOnline() {
 }
 
 async function onDisconnection(popType) {
+    if (!hasNotified) {
+        if (popType == 0) UI.showToast("Disconnected from server!", 'e');
+        else UI.showToast("Error connecting to server!", 'e');
+        if (UI.getScene() == 2) await UI.loadDashboard();
+        clearInterval(pingIOut);
+        hasNotified = true;
+    }
+
     if (isDisconnected) return;
     isDisconnected = true;
-
-    if (popType == 0) UI.showToast("Disconnected from server!", 'e');
-    else UI.showToast("Error connecting to server!", 'e');
-    if (UI.getScene() == 2) await UI.loadDashboard();
-    clearInterval(pingIOut);
 
     State.loggedIn = false;
     if (svr.readyState != 1)
