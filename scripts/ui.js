@@ -1,5 +1,6 @@
 import { Game } from "./game.js";
 import { State } from "./state.js";
+import { Utils } from "./utils.js";
 
 let loaderToken = "n/a";
 let activeScene = 0;
@@ -16,14 +17,16 @@ export class UI {
         
         await hideScene();
         await showScene(scene);
+        Utils.replaceState('auth');
     }
 
-    static async loadDashboard() {
+    static async loadDashboard(prevPush = false) {
         const scene = 1;
         if (scene == activeScene) return;
         
         await hideScene();
         await showScene(scene);
+        if (!prevPush) Utils.pushState('dashboard');
     }
 
     static async loadLobby() {
@@ -34,6 +37,8 @@ export class UI {
         await showScene(scene);
         this.setLoader(false);
         await wait(400);
+        Utils.pushState('lobby');
+        State.me.status = 'searching';
 
         await this.typeLobby("Searching For Players");
         if (typeof State.cBack.lobby == 'function') {
@@ -44,13 +49,13 @@ export class UI {
         State.hasLobbyInit = true;
         if (typeof Game.ackCB == 'function') {
             Game.ackCB();
+            Game.ackCB = null;
         }
     }
 
     static async typeLobby(typeTxt) {
         const schTxt = sceneMap[2].find('.text');
         let tmpTxt = "";
-        schTxt.text("");
 
         for (let i = 0; i < typeTxt.length; i++) {
             const typeChar = typeTxt[i];
@@ -71,6 +76,9 @@ export class UI {
             default:
                 break;
         }
+
+        Utils.pushState('game-quit');
+        Utils.pushState('game-play');
     }
 
     static async populateLobby(ids) {
@@ -137,6 +145,7 @@ export class UI {
     }
 
     static initLobby(gname) {
+        sceneMap[2].find('.text').text("");
         sceneMap[2].find('i.gname').text(gname);
         sceneMap[2].find('.players').empty();
         sceneMap[2].find('.players').append($('<b>', { class: 'me show' }));

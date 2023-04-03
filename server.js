@@ -27,6 +27,14 @@ const mimeType = {
 	'.ttf': 'application/font-sfnt'
 };
 
+function getPthName(pth) {
+	const sanitizePath = path.normalize(pth).replace(/^(\.\.[\/\\])+/, '');
+	let pathname = path.join(__dirname, sanitizePath);
+	if(!fs.existsSync(pathname))
+		pathname = getPthName('/index.html');
+	return pathname;
+}
+
 // Creating a server and listening at port 80
 http.createServer( (req, res) => {
 	// Parsing the requested URL
@@ -40,34 +48,27 @@ http.createServer( (req, res) => {
         by limiting to the current directory only.
     */
 
-	const sanitizePath = path.normalize(pth).replace(/^(\.\.[\/\\])+/, '');
-	let pathname = path.join(__dirname, sanitizePath);
+	let pathname = getPthName(pth);
 	
-	if(!fs.existsSync(pathname)) {
-		res.statusCode = 404;
-		res.end(`File ${pathname} not found!`);
-	}
-	else {
-		// Read file from file system limit to
-		// the current directory only.
-		fs.readFile(pathname, function(err, data) {
-			if(err){
-				res.statusCode = 500;
-				res.end(`Error in getting the file.`);
-			}
-			else {				
-				// Based on the URL path, extract the
-				// file extension. Ex .js, .doc, ...
-				const ext = path.parse(pathname).ext;
+	// Read file from file system limit to
+	// the current directory only.
+	fs.readFile(pathname, function(err, data) {
+		if(err){
+			res.statusCode = 500;
+			res.end(`Error in getting the file.`);
+		}
+		else {				
+			// Based on the URL path, extract the
+			// file extension. Ex .js, .doc, ...
+			const ext = path.parse(pathname).ext;
 
-				// If the file is found, set Content-type
-				// and send data
-				res.setHeader('Content-type',
-					mimeType[ext] || 'text/plain' );
-				res.end(data);
-			}
-		});
-	}
+			// If the file is found, set Content-type
+			// and send data
+			res.setHeader('Content-type',
+				mimeType[ext] || 'text/plain' );
+			res.end(data);
+		}
+	});
 }).listen(PORT);
 
 console.log(`Server listening on port ${PORT}`);

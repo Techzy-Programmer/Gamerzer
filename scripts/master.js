@@ -2,6 +2,7 @@ import { UI, wait } from "./ui.js";
 import { State } from "./state.js";
 import { Player } from "./player.js";
 import { Game } from "./game.js";
+import { Utils } from "./utils.js";
 
 const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
 const isProd = window.location.protocol === 'https:';
@@ -43,10 +44,12 @@ export class Master {
                     localStorage.setItem('User-Session', data.session);
                     State.me = new Player(data.id, data.name, 'idle');
                     $('#dash .top-bar .name b').text(data.name);
+                    Utils.nullifyNav('dashboard');
                     
                     if (UI.getScene() === 0) {
                         UI.showToast(`Welcome ${data.name}`);
-                        await UI.loadDashboard();
+                        Utils.replaceState('dashboard');
+                        await UI.loadDashboard(true);
                     }
 
                     State.loggedIn = true;
@@ -95,6 +98,7 @@ export class Master {
 
                 case 'Search-Cancelled':
                     await UI.loadDashboard();
+                    State.me.status = 'idle';
                     UI.setLoader(false);
                     break;
 

@@ -8,6 +8,12 @@ export class Game {
     static ackCB = null;
     static isRunning = false;
 
+    /*
+        [To-Do] (Potential inactive player detection)
+        Implement self pinging mechanism in game room also
+        On server side itself
+    */
+
     static async processMSG(gameMsg) {
         switch (gameMsg.msg) {
             case 'Send-ACK':
@@ -22,6 +28,10 @@ export class Game {
             default:
                 break;
         }
+    }
+
+    static quit(loadDash = true) {
+        // [To-Do] Quit game and then load dashboard based on loadDash flag
     }
 
     static send(gdata) {

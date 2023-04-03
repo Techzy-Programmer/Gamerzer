@@ -4,6 +4,7 @@ export class State {
     static cBack = {};
     static activeGCode = '';
     static loggedIn = false;
+    static navState = 'null';
     static me = new Player();
     static hasLobbyInit = false;
 

@@ -1,10 +1,12 @@
 import { UI, wait } from "./ui.js";
 import { Master } from "./master.js";
 import { initTable } from "./table.js";
-// import { State } from "./state.js";
 import { Utils } from "./utils.js";
 import { State } from "./state.js";
+import { Game } from "./game.js";
 
+let targetGCard;
+Utils.replaceState('auth');
 Master.connect();
 initTable();
 
@@ -52,10 +54,14 @@ $('#dash .top-bar .logout').click(async (e) => {
     UI.setLoader(true);
     Master.send('Logout');
     await wait(500);
-    UI.showToast("Logged out successfully");
+    Utils.nullifyNav('auth');
+    UI.showToast("Logged out successfully", 'i', 3);
     localStorage.removeItem('User-Session');
+    await wait(2000);
+    UI.showToast("Reloading the app....");
     await UI.loadAuth();
-    UI.setLoader(false);
+    await wait(1000);
+    location.reload();
 });
 
 $('#authform input.form-style').keypress(function(e) {
@@ -68,31 +74,99 @@ $('#authform input.form-style').keypress(function(e) {
 });
 
 $('#dash .games > .gcard').click(async e => {
-    const target = $(e.currentTarget),
-        gcode = target.attr('data-gcode'),
-        gname = target.attr('data-gname'),
+    targetGCard = $(e.currentTarget);
+    loadMatching();
+});
 
-        pmap = { // [To-Do] Take players count as input from user for each game
-            'rmcs': 4,
-            'bgo': 2,
-            'ttt': 2,
-            'uno': 6
-        };
+async function loadMatching() {
+    if (!targetGCard) return;
+    let gcode = targetGCard.attr('data-gcode'),
+        gname = targetGCard.attr('data-gname'),
+
+    pmap = { // [To-Do] Take players count as input from user for each game
+        'rmcs': 4,
+        'bgo': 2,
+        'ttt': 2,
+        'uno': 6
+    };
     
+    UI.initLobby(gname);
     UI.setLoader(true);
     await wait(500);
-    UI.initLobby(gname);
     State.activeGCode = gcode;
     
     Master.send("Search", {
         plrCount: pmap[gcode],
         gameId: gcode
     });
-});
+}
 
 $('#lobby button').click(async e => {
     e.preventDefault();
     UI.setLoader(true);
     await wait(500);
     Master.send("Cancel-Search");
+});
+
+window.addEventListener('popstate', async (ev) => {
+    const curState = ev.state;
+    if (!curState) return;
+    let idf = curState.identifier;
+
+    const { fwd, idx } = Utils.getNextNavIndex(idf, curState.dir); // (Can be removed)
+    Utils.go(idx); // Conditional & custom navigation implementation (Can be removed)
+    
+    if (!State.loggedIn) {
+        UI.setLoader(true);
+        Utils.replaceState('auth');
+        UI.showToast("Please login to continue!", 'w');
+        await UI.loadAuth();
+        UI.setLoader(false);
+        return;
+    }
+
+    if (idf == 'dashboard') {
+        UI.setLoader(true);
+        await wait(500);
+        
+        if (State.me.status == "searching") {
+            Master.send("Cancel-Search");
+        }
+        else {
+            await UI.loadDashboard();
+            UI.setLoader(false);
+        }
+    }
+    else if (idf == 'lobby') {
+        UI.setLoader(true);
+        await wait(500);
+        
+        if (State.me.status == "playing") {
+            Game.quit(false); // [To-Do] Here false can also be used to notify server that user quits the game abnormally
+        }
+
+        await wait(1000);
+        loadMatching();
+    }
+    else if (idf == 'game-quit' && !fwd) {
+        /*
+            [To-Do]
+            Ask the player if they really wants to quit the game
+            If so notify game instance about quiting and take back player to dashboard
+            else history.forward() ->
+        */
+    }
+    else if (idf.startsWith('game-')) {
+        UI.showToast("Unable to join the previous game!", 'e');
+        // Utils.replaceState(State.navState);
+    }
+
+    /*
+        [To-Do] (Game logic)
+        When game starts 'game-quit' should be pushed
+        followed by immediate push of 'game-play' to the history stack
+        So here we can easily track back button and ask for user if they want to quit the game
+    */
+
+    State.navState = idf;
 });
