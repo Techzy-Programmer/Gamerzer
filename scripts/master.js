@@ -4,8 +4,8 @@ import { Player } from "./player.js";
 import { Game } from "./game.js";
 import { Utils } from "./utils.js";
 
-const productionSvr = 'wss://gs-proxy.techzy.workers.dev';
 const isProd = window.location.protocol === 'https:';
+const productionSvr = 'wss://107.175.74.38:8844';
 const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
 let isDisconnected = true;
