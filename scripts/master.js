@@ -4,7 +4,7 @@ import { Player } from "./player.js";
 import { Game } from "./game.js";
 import { Utils } from "./utils.js";
 
-const productionSvr = 'wss://gamerzer-rktech.koyeb.app';
+const productionSvr = 'wss://gs-proxy.techzy.workers.dev';
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
@@ -163,7 +163,7 @@ async function checkOnline() {
         if (isRetryDisabled) return false;
 
         if ((caught || !navigator.onLine) && !notified) {
-            dispToast = UI.showToast('You are offline!\nWaiting for Internet connection...', 'w', 0, false);
+            dispToast = UI.showToast('Waiting for Internet connection...', 'w', 0, false);
             UI.setLoader(true);
             notified = true;
         }

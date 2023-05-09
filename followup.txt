@@ -1,0 +1,27 @@
+// progressbar.js@1.0.0 version is used
+// Docs: http://progressbarjs.readthedocs.org/en/1.0.0/
+
+var bar = new ProgressBar.Line(container, {
+	strokeWidth: 4,
+	easing: 'bounce',
+	duration: 1000,
+	color: '#FFEA82',
+	trailColor: '#eee',
+	trailWidth: 1,
+	svgStyle: {width: '100%', height: '100%'},
+	from: {color: '#FFEA82'},
+	to: {color: '#ED6A5A'},
+	step: (state, bar) => {
+		bar.path.setAttribute('stroke', state.color);
+	}
+});
+
+bar.set(1);
+/* bar.animate(0.9) */
+
+let i = 1;
+const ival = setInterval(() => {
+	bar.animate((i -= 0.01667));
+  if (i <= 0) clearInterval(ival);
+  console.log(i);
+}, 1000);
