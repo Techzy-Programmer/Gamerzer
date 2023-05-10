@@ -1,7 +1,6 @@
 import { Player } from "./player.js";
 
 export class State {
-    static cBack = {};
     static activeGCode = '';
     static loggedIn = false;
     static navState = 'null';

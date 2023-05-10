@@ -39,12 +39,7 @@ export class UI {
         await wait(400);
         Utils.pushState('lobby');
         State.me.status = 'searching';
-
         await this.typeLobby("Searching For Players");
-        if (typeof State.cBack.lobby == 'function') {
-            State.cBack.lobby();
-            await wait(500);
-        }
 
         State.hasLobbyInit = true;
         if (typeof Game.ackCB == 'function') {

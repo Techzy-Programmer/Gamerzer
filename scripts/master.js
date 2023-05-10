@@ -82,7 +82,7 @@ export class Master {
                     break;
 
                 case 'In-Lobby':
-                    State.cBack['lobby'] = () => UI.populateLobby(data.ids);
+                    UI.populateLobby(data.ids);
                     break;
 
                 case 'New-Opponent':
