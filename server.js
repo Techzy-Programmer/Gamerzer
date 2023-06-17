@@ -5,6 +5,7 @@ const path = require('path');
 const http = require('http');
 const url = require('url');
 const fs = require('fs');
+const os = require('os');
 const PORT = 80;
 
 // Maps file extension to MIME types which helps browser
@@ -33,6 +34,21 @@ function getPthName(pth) {
 	if(!fs.existsSync(pathname))
 		pathname = getPthName('/index.html');
 	return pathname;
+}
+
+function getLocalIP() {
+	const interfaces = os.networkInterfaces();
+	for (const interfaceName in interfaces) {
+		const interface = interfaces[interfaceName];
+		for (const iface of interface) {
+			// skip over internal (non-IPv4) and non-external (e.g. VPN) addresses
+			if (iface.family !== 'IPv4' || iface.internal !== false) continue;
+			return iface.address;
+		}
+	}
+	
+	// return null if no local IP address found
+	return null;
 }
 
 // Creating a server and listening at port 80
@@ -69,6 +85,9 @@ http.createServer( (req, res) => {
 			res.end(data);
 		}
 	});
-}).listen(PORT);
-
-console.log(`Server listening on port ${PORT}`);
+}).listen(PORT, () => {
+	myLocalIP = getLocalIP();
+	console.log(`Server started successfully`);
+	console.log(`Listening locally at http://localhost:${PORT}`);
+	myLocalIP && console.log(`Listening on LAN interface at http://${myLocalIP}:${PORT}`);
+});

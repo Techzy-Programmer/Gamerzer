@@ -63,7 +63,7 @@ export class UI {
     static async loadGame(gcode) {
         switch (gcode) {
             case 'rmcs': // Raja Mantri Chor Sipahi
-                // [To-Do] Create UI for rmcs and load lit
+                // [To-Do] Create UI for rmcs and load it
                 this.showToast("Moved To Game Scene"); // Dummy test
                 activeScene = 3;
                 break;
