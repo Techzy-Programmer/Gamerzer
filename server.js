@@ -1,6 +1,7 @@
 /* Node.js static file web server */
 
 // Importing necessary modules
+const { exec } = require('child_process');
 const path = require('path');
 const http = require('http');
 const url = require('url');
@@ -43,7 +44,9 @@ function getLocalIP() {
 		for (const iface of interface) {
 			// skip over internal (non-IPv4) and non-external (e.g. VPN) addresses
 			if (iface.family !== 'IPv4' || iface.internal !== false) continue;
-			return iface.address;
+			let locIP = `${iface.address}`;
+			if (locIP.startsWith('192'))
+				return locIP;
 		}
 	}
 	
@@ -88,6 +91,8 @@ http.createServer( (req, res) => {
 }).listen(PORT, () => {
 	myLocalIP = getLocalIP();
 	console.log(`Server started successfully`);
+	const lanIP = `http://${myLocalIP}:${PORT}`;
 	console.log(`Listening locally at http://localhost:${PORT}`);
-	myLocalIP && console.log(`Listening on LAN interface at http://${myLocalIP}:${PORT}`);
+	myLocalIP && console.log(`Listening on LAN interface at ${lanIP}`);
+	exec(`start msedge.exe --inprivate "${lanIP}"`);
 });

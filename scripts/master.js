@@ -5,8 +5,8 @@ import { Game } from "./game.js";
 import { Utils } from "./utils.js";
 
 const isProd = window.location.protocol === 'https:';
+const localSvr = `ws://${location.hostname}:8844`;
 const productionSvr = 'wss://107.175.74.38:8844';
-const localSvr = `ws://${location.host}:8844`;
 let isRetryDisabled = false;
 let isDisconnected = true;
 let hasNotified = false;

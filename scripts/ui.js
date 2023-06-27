@@ -7,7 +7,8 @@ let activeScene = 0;
 let sceneMap = {
     0: $('div#sandwich > #authform'),
     1: $('div#sandwich > #dash'),
-    2: $('div#sandwich > #lobby')
+    2: $('div#sandwich > #lobby'),
+    3: $('div#sandwich > #rmcs')
 }
 
 export class UI {
@@ -62,11 +63,12 @@ export class UI {
 
     static async loadGame(gcode) {
         switch (gcode) {
-            case 'rmcs': // Raja Mantri Chor Sipahi
+            case 'rmcs': { // Raja Mantri Chor Sipahi
                 // [To-Do] Create UI for rmcs and load it
-                this.showToast("Moved To Game Scene"); // Dummy test
-                activeScene = 3;
-                break;
+                const scene = 3;
+                await hideScene();
+                await showScene(scene);
+            }
 
             default:
                 break;

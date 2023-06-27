@@ -12,8 +12,15 @@ initTable();
 
 // UI Testing ---
 
-// UI.loadDashboard();
-// UI.setLoader(false);
+(async () => {
+    UI.setLoader(false);
+    await UI.loadDashboard();
+    await UI.loadGame("rmcs");
+
+    $('#rmcs .chit').click(function() {
+        $(this).eq(0).toggleClass('active');
+    })
+})();
 
 // Remove above code when testing done.....
 
