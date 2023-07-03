@@ -10,19 +10,30 @@ Utils.replaceState('auth');
 Master.connect();
 initTable();
 
-// UI Testing ---
+// #region UI Testing ---
 
-(async () => {
-    UI.setLoader(false);
-    await UI.loadDashboard();
-    await UI.loadGame("rmcs");
+// (async () => {
+//     UI.setLoader(false);
+//     await UI.loadDashboard();
+//     await wait(200);
 
-    $('#rmcs .chit').click(function() {
-        $(this).eq(0).toggleClass('active');
-    })
-})();
+//     // Simulating server for testing
+//     State.activeGCode = 'rmcs';
+//     const testMSG = {
+//         msg: 'Goto-Game',
+//         data: {
+//             plrIds: [ 2, 5, 1 ]
+//         }
+//     };
+
+//     await Game.processMSG(testMSG);
+//     $('#rmcs .chit').click(function() {
+//         $(this).eq(0).toggleClass('active');
+//     });
+// })();
 
 // Remove above code when testing done.....
+// #endregion
 
 $('#signupBtn').click(async (e) => {
     e.preventDefault();

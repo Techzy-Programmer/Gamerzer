@@ -40,8 +40,6 @@ export class Utils {
         }, null, `${state}`);
 
         State.navState = state;
-        console.log(navDir, newDir);
-        console.log('pushed', navHistory);
     }
 
     static replaceState(state, data = null) {
@@ -56,8 +54,6 @@ export class Utils {
 
         navHistory[navPos] = state;
         State.navState = state;
-        console.log(navDir, newDir);
-        console.log('replaced', navHistory);
     }
 
     static go(nvId, nvState) { // (Non-Operational)
@@ -97,7 +93,6 @@ export class Utils {
             idx *= -1;
         }
 
-        console.log(`Forward? ${fwd} & Index? ${idx}`);
         return { fwd, idx };
     }
 

@@ -1,4 +1,5 @@
 export class Player {
+    isSelf = false;
     status = '';
     name = '';
     id = -1;

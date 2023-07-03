@@ -37,7 +37,7 @@ function getPthName(pth) {
 	return pathname;
 }
 
-function getLocalIP() {
+function getLanIP() {
 	const interfaces = os.networkInterfaces();
 	for (const interfaceName in interfaces) {
 		const interface = interfaces[interfaceName];
@@ -89,10 +89,16 @@ http.createServer( (req, res) => {
 		}
 	});
 }).listen(PORT, () => {
-	myLocalIP = getLocalIP();
+	let myLanIP = getLanIP();
+	let local = `http://localhost:${PORT}`;
 	console.log(`Server started successfully`);
-	const lanIP = `http://${myLocalIP}:${PORT}`;
-	console.log(`Listening locally at http://localhost:${PORT}`);
-	myLocalIP && console.log(`Listening on LAN interface at ${lanIP}`);
-	exec(`start msedge.exe --inprivate "${lanIP}"`);
+	console.log(`Listening locally at ${local}`);
+
+	if (myLanIP) {
+		local = myLanIP;
+		const lanIP = `http://${myLanIP}:${PORT}`;
+		console.log(`Listening on LAN interface at ${lanIP}`);
+	}
+	
+	exec(`start msedge.exe --inprivate "${local}"`);
 });
