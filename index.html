@@ -5,13 +5,11 @@
 		<meta charset="UTF-8" />
 		<title>Gamerzer : Gamers Enery Dose</title>
 		<link rel="icon" type="image/png" href="./Icon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
         <meta name="google-site-verification" content="vi-Smq5YFiirdarbLQi84dgclzxSzutwMpNmrZsZdpc" />
 		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
-		<script async type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 		<link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
-		<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
 		<link rel="stylesheet" href="styles/look.css" />
 	</head>
 	<body class="loading">
@@ -31,6 +29,23 @@
 		</header>
 		
 		<div id="sandwich">
+			<div class="alert-bx utility">
+				<b>Getting your result</b>
+				<img src="/media/alert/info.png" alt="Status">
+			</div>
+			<div class="modal-bx utility" tabindex="-1" role="dialog">
+                <div class="modal-data">
+                    <img src="/media/alert/query.png" alt="Query" class="modal-img">
+                    <h1 class="modal-title">Query to Ask?</h1>
+                    <p class="modal-desc">Custom long elaboration over the asked query!</p>
+
+					<div>
+						<button class="modal-btn t">Accept</button>
+						<button class="modal-btn f">Deny</button>
+					</div>
+                </div>
+            </div>
+
 			<!-- #region Auth form -->
 			<div id="authform" class="section">
 				<div class="container">
@@ -203,10 +218,11 @@
 			<div id="rmcs" class="out-stage">
 				<div class="status">
 					<b class="label">Game is running smooth & fine!</b>
-					<b class="ping g">224 ms</b>
+					<b class="game-ping g">224 ms</b>
 				</div>
-				<div class="plrs up">
+				<div class="plrs up" style="--dir: 1">
 					<div class="plr left">
+						<div class="emoji msg hide"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -214,12 +230,12 @@
 							<b class="pts">0 Pts</b>
 						</div>
 						<div class="emojis">
-							<div class="emoji e01"></div>
-							<div class="emoji e02"></div>
-							<div class="emoji e03"></div>
-							<div class="emoji e04"></div>
-							<div class="emoji e05"></div>
-							<div class="emoji e06"></div>
+							<div class="emoji" data-eid="1"></div>
+							<div class="emoji" data-eid="2"></div>
+							<div class="emoji" data-eid="3"></div>
+							<div class="emoji" data-eid="4"></div>
+							<div class="emoji" data-eid="5"></div>
+							<div class="emoji" data-eid="6"></div>
 						</div>
 						<div class="tool">
 							<a>
@@ -231,6 +247,7 @@
 						<div class="prog-bar"></div>
 					</div>
 					<div class="plr right">
+						<div class="emoji msg hide"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -238,12 +255,12 @@
 							<b class="pts">0 Pts</b>
 						</div>
 						<div class="emojis">
-							<div class="emoji e01"></div>
-							<div class="emoji e02"></div>
-							<div class="emoji e03"></div>
-							<div class="emoji e04"></div>
-							<div class="emoji e05"></div>
-							<div class="emoji e06"></div>
+							<div class="emoji" data-eid="1"></div>
+							<div class="emoji" data-eid="2"></div>
+							<div class="emoji" data-eid="3"></div>
+							<div class="emoji" data-eid="4"></div>
+							<div class="emoji" data-eid="5"></div>
+							<div class="emoji" data-eid="6"></div>
 						</div>
 						<div class="tool">
 							<a>
@@ -309,8 +326,9 @@
 						</div>
 					</div>
 				</div>
-				<div class="plrs down">
+				<div class="plrs down" style="--dir: -1">
 					<div class="plr left">
+						<div class="emoji msg hide"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -318,12 +336,12 @@
 							<b class="pts">0 Pts</b>
 						</div>
 						<div class="emojis">
-							<div class="emoji e01"></div>
-							<div class="emoji e02"></div>
-							<div class="emoji e03"></div>
-							<div class="emoji e04"></div>
-							<div class="emoji e05"></div>
-							<div class="emoji e06"></div>
+							<div class="emoji" data-eid="1"></div>
+							<div class="emoji" data-eid="2"></div>
+							<div class="emoji" data-eid="3"></div>
+							<div class="emoji" data-eid="4"></div>
+							<div class="emoji" data-eid="5"></div>
+							<div class="emoji" data-eid="6"></div>
 						</div>
 						<div class="tool">
 							<a>
@@ -398,8 +416,17 @@
 			</svg>
 		</footer>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/0.6.1/progressbar.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/0.6.1/progressbar.min.js" defer></script>
+		<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js" defer></script>
+		<script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
+		<script type="module" src="scripts/main.js" defer></script>
+
 		<!-- Icons Store => https://icon-sets.iconify.design/uil/ -->
-		<script type="module" src="scripts/main.js"></script>
+		
+		<!-- #region Cloudflare Web Analytics Start -->
+		<script src='https://static.cloudflareinsights.com/beacon.min.js'
+			data-cf-beacon='{"token": "56a88da752314a0194203098b663b7d5"}' defer>
+		</script>
+		<!-- #endregion Cloudflare Web Analytics End -->
 	</body>
 </html>

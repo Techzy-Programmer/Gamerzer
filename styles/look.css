@@ -10,7 +10,32 @@
 	--fs-tnm: 16px;
 }
 
-/* #region Global-Emoji */
+::selection {
+	background-color: #00000075;
+}
+
+/* #region Alert, Emoji & Modal box */
+
+div.alert-bx {
+	--albx-b1: #468100eb;
+	--albx-clr: #062700;
+	--albx-b2: #53f9ff;
+	z-index: 10;
+	position: fixed;
+	color: var(--albx-clr);
+	padding: 2px 2px 2px 6px;
+	border-radius: 0 50px 50px 0;
+	transform: translateX(-100%);
+	transition: transform 0.4s cubic-bezier(0.68, -.40, 0.4, 1.25);
+	background: linear-gradient(45deg, var(--albx-b1), var(--albx-b2));
+}
+
+div.alert-bx.active { transform: translateX(0) }
+div.alert-bx.w {
+	--albx-clr: #270000;
+	--albx-b1: #813a00eb;
+	--albx-b2: #ffba53;
+}
 
 div.emojis {
 	padding-bottom: 4px;
@@ -20,30 +45,149 @@ div.emojis {
 }
 
 div.emoji {
+	opacity: 1;
 	margin: 2px;
 	cursor: pointer;
 	user-select: none;
 	transform: scale(1);
+	visibility: visible;
 	width: clamp(16px, 5vw, 22px);
 	height: clamp(16px, 5vw, 22px);
-	transition: transform 0.2s ease;
 	background-size: contain !important;
 	background-position: center !important;
+	transition: transform 0.2s ease, visibility 0s linear, opacity 0.2s ease;
 }
 
-div.emoji.e01:active { transform: scale(1.15) }
-div.emoji.e02:active { transform: scale(1.15) }
-div.emoji.e03:active { transform: scale(1.15) }
-div.emoji.e04:active { transform: scale(1.15) }
-div.emoji.e05:active { transform: scale(1.15) }
-div.emoji.e06:active { transform: scale(1.15) }
+div.emoji.msg {
+	transform: translate(0, 0) scale(1.4);
+	position: absolute;
+}
 
-div.emoji.e01 { background: url('/media/emoji/halo-smiling-face.png') }
-div.emoji.e03 { background: url('/media/emoji/tears-of-joy.png') }
-div.emoji.e04 { background: url('/media/emoji/very-angry.png') }
-div.emoji.e05 { background: url('/media/emoji/blow-kiss.png') }
-div.emoji.e06 { background: url('/media/emoji/very-mad.png') }
-div.emoji.e02 { background: url('/media/emoji/poop.png') }
+div.emoji.hide {
+	opacity: 0;
+	animation: none;
+	visibility: hidden;
+}
+
+div.emoji.anim {
+	z-index: 10;
+	animation: msgAnim 3s ease-out 1 forwards;
+}
+
+@keyframes msgAnim {
+	0% { transform: translate(0, 0) scale(1.4) }
+	20% { transform: translate(0, calc(var(--dir) * 140px)) scale(1) }
+	30% { transform: translate(0, calc(var(--dir) * 140px)) scale(2.2) }
+	40% { transform: translate(0, calc(var(--dir) * 140px)) scale(1) }
+	50% { transform: translate(0, calc(var(--dir) * 140px)) scale(2) }
+	60% { transform: translate(0, calc(var(--dir) * 140px)) scale(1) }
+	70% { transform: translate(0, calc(var(--dir) * 140px)) scale(1.8) }
+	80% { transform: translate(0, calc(var(--dir) * 140px)) scale(1) }
+	90% { transform: translate(0, calc(var(--dir) * 140px)) scale(1.6) }
+	100% { transform: translate(0, calc(var(--dir) * 80px)) scale(0) }
+}
+
+div.emoji[data-eid="1"] { background: url('/media/emoji/halo-smiling-face.png') }
+div.emoji[data-eid="3"] { background: url('/media/emoji/tears-of-joy.png') }
+div.emoji[data-eid="4"] { background: url('/media/emoji/very-angry.png') }
+div.emoji[data-eid="5"] { background: url('/media/emoji/blow-kiss.png') }
+div.emoji[data-eid="6"] { background: url('/media/emoji/very-mad.png') }
+div.emoji[data-eid="2"] { background: url('/media/emoji/poop.png') }
+div.emoji[data-eid="1"]:active { transform: scale(1.15) }
+div.emoji[data-eid="2"]:active { transform: scale(1.15) }
+div.emoji[data-eid="3"]:active { transform: scale(1.15) }
+div.emoji[data-eid="4"]:active { transform: scale(1.15) }
+div.emoji[data-eid="5"]:active { transform: scale(1.15) }
+div.emoji[data-eid="6"]:active { transform: scale(1.15) }
+
+
+.modal-bx {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	position: fixed;
+	align-items: flex-end;
+	justify-content: center;
+	background-color: #1c032769;
+	transition: visibility 0.6s, opacity 0.2s 0.2s;
+	perspective: 1000px;
+	visibility: hidden;
+	overflow: hidden;
+	z-index: 50;
+	opacity: 0;
+}
+
+.modal-bx > .modal-data {
+	width: 100%;
+	display: flex;
+	padding: 20px 8px;
+	position: relative;
+	text-align: center;
+	align-items: center;
+	flex-direction: column;
+	transform-origin: 50% 100%;
+	border-radius: 80px 80px 0 0;
+	border-top: 5px solid #61008324;
+	transform: rotateX(80deg) scale(0.85) translateY(0%);
+	background: radial-gradient(#3c1138cc, #000000cf);
+	transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+	box-shadow: inset 0px 20px 80px -32px #03032494, 0px 0px 50px -10px #22003cad;
+}
+
+.modal-bx > .modal-data .modal-img	{
+	margin-bottom: 25px;
+	width: 60px;
+}
+
+.modal-bx > .modal-data .modal-btn {
+	border: none;
+	margin: 0 4px;
+	outline: none;
+	color: #f2e3ff;
+	padding: 12px 18px;
+	border-radius: 40px;
+	will-change: background-color;
+	border-bottom: 1px solid #b76bffab;
+	transition: background-color 0.2s ease;
+	background-color: hsl(264deg 74% 8% / 80%);
+}
+
+.modal-bx > .modal-data .modal-btn:hover { background-color: hsl(274deg 30% 12% / 70%) }
+
+.modal-bx > .modal-data .modal-title{
+	color: hsl(279.69deg 100% 87.97%);
+	margin-bottom: 8px;
+	font-size: 24px;
+}
+
+.modal-bx > .modal-data .modal-desc {
+	margin-bottom: 25px;
+	text-align: center;
+	color: #b3a3bea6;
+	line-height: 1.25;
+	font-size: 16px;
+	width: 70%;
+}
+
+.modal-bx.show {
+	transition: visibility 0.6s, opacity 0.1s 0s;
+	backdrop-filter: blur(2px);
+	visibility: visible;
+	opacity: 1;
+}
+
+.modal-bx.show > .modal-data { transform: rotateX(0) scale(1) translateY(0) }
+
+@media screen and (min-width: 400px) {
+	.modal-bx > .modal-data {
+		border-radius: 10px 80px 10px 80px;
+		margin: auto;
+		width: 360px;
+		border: none;
+	}
+}
 
 /* #endregion */
 
@@ -62,7 +206,7 @@ body
 	font-family: 'Poppins', sans-serif;
 }
 
-body > #sandwich > div {
+body > #sandwich > div:not(.utility) {
 	height: 100% !important;
 	backdrop-filter: blur(4px);
 	transition: opacity 0.4s ease-in-out, transform 0.5s ease-in-out;
@@ -70,6 +214,7 @@ body > #sandwich > div {
 
 body > div#sandwich {
 	height: 100dvh;
+	position: relative;
 	background: url('../media/bg.jpg');
 	background-repeat: no-repeat;
 	background-attachment: fixed;
@@ -1378,22 +1523,21 @@ body > header.sticky .subhead .author
 #rmcs > .status, #rmcs > .settings {
 	width: 94%;
 	display: flex;
-	padding: 2px 6px 6px 6px;
 	color: #afafaf;
 	max-width: 400px;
-	border-radius: 0 0 20px 20px;
-	background: linear-gradient(0deg, #150027, #871e8424);
 	align-items: center;
-	box-shadow: 0px 1px 4px -2px #e282ff;
+	padding: 2px 6px 6px 6px;
+	border-radius: 0 0 20px 20px;
 	justify-content: space-between;
 	font-size: clamp(13px, 4vw, 16px);
+	box-shadow: 0px 1px 4px -2px #e282ff;
+	background: linear-gradient(0deg, #150027, #871e8424);
 }
 
-#rmcs > .status .ping.r { color: #ff7676; }
-#rmcs > .status .ping.o { color: #ffcb86; }
-#rmcs > .status .ping.y { color: #ffffa4; }
-
-#rmcs > .status .ping {
+#rmcs > .status .game-ping.r { color: #ff7676; }
+#rmcs > .status .game-ping.o { color: #ffcb86; }
+#rmcs > .status .game-ping.y { color: #ffffa4; }
+#rmcs > .status .game-ping {
 	font-family: monospace;
 	color: #b8ff94;
 }
@@ -1563,12 +1707,12 @@ body > header.sticky .subhead .author
 	width: 100%;
 	color: #e8ffc3;
 	cursor: pointer;
-	border-radius: var(--vrad);
 	font-size: 1.2rem;
-	text-shadow: 0px 0px 10px #fff6ca61;
 	align-items: center;
 	justify-content: center;
+	border-radius: var(--vrad);
 	backdrop-filter: blur(1px);
+	text-shadow: 0px 0px 10px #fff6ca61;
 }
 
 /* #endregion */
@@ -1590,15 +1734,15 @@ body > header.sticky .subhead .author
 	border-radius: 15px 15px 0 0;
 	transition: filter 0.25s ease-in-out;
 	border: 2px dotted rgb(50, 205, 202);
-	border-bottom: none;
 	background: radial-gradient(circle, #01161cee, #000000e6);
+	border-bottom: none;
 }
 
 #rmcs > div.settings a.end {
-	color: #ffa890;
+	background: radial-gradient(circle, #1c0101ee, #000000e6);
 	border: 2px dotted rgb(205 111 50);
 	border-bottom: none;
-	background: radial-gradient(circle, #1c0101ee, #000000e6);
+	color: #ffa890;
 }
 
 #rmcs > div.settings a:hover {

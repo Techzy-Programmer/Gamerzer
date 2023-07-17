@@ -32,7 +32,7 @@ initTable();
 //     });
 // })();
 
-// Remove above code when testing done.....
+// Comment above code when UI testing done.....
 // #endregion
 
 $('#signupBtn').click(async (e) => {
@@ -101,7 +101,7 @@ async function loadMatching() {
     let gcode = targetGCard.attr('data-gcode'),
         gname = targetGCard.attr('data-gname'),
 
-    pmap = { // [To-Do] Take players count as input from user for each game
+    pmap = { // ToDo: Take players count as input from user for each game
         'rmcs': 4,
         'bgo': 2,
         'ttt': 2,
@@ -130,9 +130,8 @@ window.addEventListener('popstate', async (ev) => {
     const curState = ev.state;
     if (!curState) return;
     let idf = curState.identifier;
-
-    const { fwd, idx } = Utils.getNextNavIndex(idf, curState.dir); // (Can be removed)
-    Utils.go(idx); // Conditional & custom navigation implementation (Can be removed)
+    const { fwd, idx } = Utils.getNextNavIndex(idf, curState.dir);
+    Utils.go(idx); // Conditional & custom navigation implementation
     
     if (!State.loggedIn) {
         UI.setLoader(true);
@@ -159,32 +158,44 @@ window.addEventListener('popstate', async (ev) => {
         UI.setLoader(true);
         await wait(500);
         
-        if (State.me.status == "playing") {
-            Game.quit(false); // [To-Do] Here false can also be used to notify server that user quits the game abnormally
+        if (State.me.status === "playing") {
+            Game.quit(false);
+            return;
         }
 
         await wait(1000);
         loadMatching();
     }
     else if (idf == 'game-quit' && !fwd) {
-        /*
-            [To-Do]
-            Ask the player if they really wants to quit the game
-            If so notify game instance about quiting and take back player to dashboard
-            else history.forward() ->
-        */
+        Utils.setModalOpt(); // Reset back the modal props
+        const confRes = await Utils.showGetModal("Quit the Game?",
+            "Are you sure to Quit the ongoing game? you may lose the game and progress!", "Quit", "Cancel");
+        if (confRes.accepted) Game.quit();
+        else window.history.forward();
     }
-    else if (idf.startsWith('game-')) {
+    else if (idf.startsWith('game-') && State.me.status !== 'playing') {
         UI.showToast("Unable to join the previous game!", 'e');
         // Utils.replaceState(State.navState);
     }
 
-    /*
-        [To-Do] (Game logic)
-        When game starts 'game-quit' should be pushed
-        followed by immediate push of 'game-play' to the history stack
-        So here we can easily track back button and ask for user if they want to quit the game
-    */
-
     State.navState = idf;
 });
+
+(() => {
+    const mdlBox = $('#sandwich > .modal-bx');
+    const focusables = mdlBox.find('a, input, textarea, button, select');
+    const firstFocusable = focusables[0], lastFocusable = focusables[focusables.length - 1];
+    
+    mdlBox.on('keydown', (e) => {
+        if (e.key !== 'Tab' || e.keyCode !== 9) return;
+
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+            lastFocusable.focus();
+            e.preventDefault();
+        }
+        else if (document.activeElement === lastFocusable) {
+            firstFocusable.focus();
+            e.preventDefault();
+        }
+    });
+})();

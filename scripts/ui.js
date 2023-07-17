@@ -64,7 +64,6 @@ export class UI {
     static async loadGame(gcode) {
         switch (gcode) {
             case 'rmcs': { // Raja Mantri Chor Sipahi
-                // [To-Do] Create UI for rmcs and load it
                 const scene = 3;
                 await hideScene();
                 await showScene(scene);

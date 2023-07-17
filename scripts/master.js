@@ -41,38 +41,49 @@ export class Master {
             switch (msg.type) {
                 case 'Logged-In':
                     data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
+                    const tokStr = localStorage.getItem('RMCS-Respawn-Token');
                     localStorage.setItem('User-Session', data.session);
                     State.me = new Player(data.id, data.name, 'idle');
                     $('#dash .top-bar .name b').text(data.name);
                     Utils.nullifyNav('dashboard');
+                    State.loggedIn = true;
                     
+                    if (tokStr && tokStr.includes('@')) {
+                        const [tokData, tokTime] = tokStr.split('@');
+                        const tokTimeInt = parseInt(tokTime); // To Int
+                        const mins = (Date.now() - tokTimeInt) / (60 * 1000);
+                        
+                        if (tokData.length === 64 && mins < 5) {
+                            // ToDo: Implement player respawning
+                            // return; // Make sure to break here
+                        }
+                    }
+
                     if (UI.getScene() === 0) {
                         UI.showToast(`Welcome ${data.name}`);
                         Utils.replaceState('dashboard');
                         await UI.loadDashboard(true);
                     }
 
-                    State.loggedIn = true;
                     UI.setLoader(false);
                     break;
 
                 case 'Joined':
-                    if (State.me.status != 'playing') UI.showToast(`${data.name} Joined`); // Don't distract player while gameplay
+                    if (State.me.status !== 'playing') UI.showToast(`${data.name} Joined`); // Don't distract player while gameplay
                     State.players[data.id] = new Player(data.id, data.name, 'idle');
                     break;
 
                 case 'Left':
                     if (data.id in State.players) {
-                        if (State.me.status != 'playing') UI.showToast(`${State.players[data.id].name} Left`, 'w');
+                        if (State.me.status !== 'playing') UI.showToast(`${State.players[data.id].name} Left`, 'w');
                         delete State.players[data.id];
                     }
                     break;
 
                 case 'Statistics':
                     /*
-                        [To-To] ----------
-                        Add rows based on data received from server
-                        Afterwards make table visible with display: block
+                        ToDo: Add rows based on data received from server
+                        ToDo: Afterwards make table visible with 'display: block'
                     */
                     break;
 
