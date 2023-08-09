@@ -5,11 +5,10 @@
 		<meta charset="UTF-8" />
 		<title>Gamerzer : Gamers Enery Dose</title>
 		<link rel="icon" type="image/png" href="./Icon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="google-site-verification" content="vi-Smq5YFiirdarbLQi84dgclzxSzutwMpNmrZsZdpc" />
-		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css">
+		<link rel="stylesheet" type="text/css" href="dist/styles/toastify.min.css">
 		<link rel="stylesheet" href="styles/look.css" />
 	</head>
 	<body class="loading">
@@ -27,8 +26,9 @@
 				<b class="author">RISHABH KUMAR (MVIT)</b>
 			</b>
 		</header>
-		
+
 		<div id="sandwich">
+			<!-- #region Utilities -->
 			<div class="alert-bx utility">
 				<b>Getting your result</b>
 				<img src="/media/alert/info.png" alt="Status">
@@ -45,72 +45,58 @@
 					</div>
                 </div>
             </div>
-
+			<!-- #endregion -->
+			
 			<!-- #region Auth form -->
 			<div id="authform" class="section">
 				<div class="container">
-					<div class="row full-height justify-content-center">
-						<div class="col-12 text-center align-self-center">
-							<div class="section pt-sm-2 text-center">
-								<h6 class="mb-0 pb-3">
-									<span>Log In </span>
-									<span>Sign Up</span>
-								</h6>
-								<input class="checkbox" type="checkbox" id="reg-log" name="reg-log" />
-								<label for="reg-log"></label>
-								<div class="card-3d-wrap mx-auto">
-									<div class="card-3d-wrapper">
-										<div class="card-front">
-											<div class="center-wrap">
-												<div class="section text-center">
-													<h4 class="mb-4 pb-3">Log In</h4>
-													<div class="form-group">
-														<input type="email" name="lemail" class="form-style" placeholder="Your Email" id="lemail" autocomplete="off">
-														<i class="input-icon uil uil-at"></i>
-													</div>
-													<div class="form-group mt-2">
-														<input type="password" name="lpass" class="form-style" placeholder="Your Password" id="lpass" autocomplete="off">
-														<i class="input-icon uil uil-lock-alt"></i>
-													</div>
-													<a id="loginBtn" class="btn mt-4">submit</a>
-													<p class="mb-0 mt-4 text-center">
-														<a href="#0" class="link">Forgot your password?</a>
-													</p>
-												</div>
-											</div>
-										</div>
-										<div class="card-back">
-											<div class="center-wrap">
-												<div class="section text-center">
-													<h4 class="mb-4 pb-3">Sign Up</h4>
-													<div class="form-group">
-														<input type="text" name="sname" class="form-style" placeholder="Your Name" id="sname" autocomplete="off">
-														<i class="input-icon uil uil-user"></i>
-													</div>
-													<div class="form-group mt-2">
-														<input type="email" name="semail" class="form-style" placeholder="Your Email" id="semail" autocomplete="off">
-														<i class="input-icon uil uil-at"></i>
-													</div>
-													<div class="form-group mt-2">
-														<input type="password" name="spass" class="form-style" placeholder="New Password" id="spass" autocomplete="off">
-														<i class="input-icon uil uil-lock-alt"></i>
-													</div>
-													<div class="form-group mt-2">
-														<input type="password" name="saccess" class="form-style" placeholder="Access Code" id="saccess" autocomplete="off">
-														<i class="input-icon uil uil-shield-question"></i>
-													</div>
-													<a id="signupBtn" class="btn mt-4">submit</a>
-												</div>
-											</div>
-										</div>
-									</div>
+					<input class="checkbox" type="checkbox" id="reg-log" name="reg-log" />
+					<label for="reg-log"></label>
+					<h6>
+						<span class="l">Log In </span>
+						<span class="s">Sign Up</span>
+					</h6>
+					<div class="card-container">
+						<div class="card-wrapper">
+							<div class="card-front">
+								<h4>Log In</h4>
+								<div class="form-group">
+									<input type="email" name="lemail" class="input-tb" placeholder="Your Email" id="lemail" autocomplete="off">
+									<i class="input-icon uil uil-at"></i>
 								</div>
+								<div class="form-group">
+									<input type="password" name="lpass" class="input-tb" placeholder="Your Password" id="lpass" autocomplete="off">
+									<i class="input-icon uil uil-lock-alt"></i>
+								</div>
+								<a tabindex="0" id="loginBtn" class="btn">Submit</a>
+								<p><a href="#0" class="link">Forgot Your Password?</a></p>
+							</div>
+							<div class="card-back">
+								<h4>Sign Up</h4>
+								<div class="form-group">
+									<input type="text" name="sname" class="input-tb" placeholder="Your Name" id="sname" autocomplete="off">
+									<i class="input-icon uil uil-user"></i>
+								</div>
+								<div class="form-group">
+									<input type="email" name="semail" class="input-tb" placeholder="Your Email" id="semail" autocomplete="off">
+									<i class="input-icon uil uil-at"></i>
+								</div>
+								<div class="form-group">
+									<input type="password" name="spass" class="input-tb" placeholder="New Password" id="spass" autocomplete="off">
+									<i class="input-icon uil uil-lock-alt"></i>
+								</div>
+								<div class="form-group">
+									<input type="password" name="saccess" class="input-tb" placeholder="Access Code" id="saccess" autocomplete="off">
+									<i class="input-icon uil uil-shield-question"></i>
+								</div>
+								<a tabindex="0" id="signupBtn" class="btn">Submit</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<!-- #endregion -->
+			
 			<!-- #region Dashboard -->
 			<div id="dash" class="out-stage">
 				<div class="top-bar">
@@ -198,6 +184,7 @@
 				</div>
 			</div>
 			<!-- #endregion -->
+			
 			<!-- #region Lobby -->
 			<div id="lobby" class="out-stage">
 				<data class="text"></data>
@@ -215,14 +202,16 @@
 				</div>
 			</div>
 			<!-- #endregion -->
+			
 			<div id="rmcs" class="out-stage">
 				<div class="status">
 					<b class="label">Game is running smooth & fine!</b>
 					<b class="game-ping g">224 ms</b>
 				</div>
 				<div class="plrs up" style="--dir: 1">
-					<div class="plr left">
+					<div data-assigned="no" class="plr left">
 						<div class="emoji msg hide"></div>
+						<div class="disc-banner"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -246,8 +235,9 @@
 						</div>
 						<div class="prog-bar"></div>
 					</div>
-					<div class="plr right">
+					<div data-assigned="no" class="plr right">
 						<div class="emoji msg hide"></div>
+						<div class="disc-banner"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -273,7 +263,7 @@
 					</div>
 				</div>
 				<div class="chit-box">
-					<div class="chit" data-id="0" data-clickable="false">
+					<div class="chit" data-id="0" data-clickable="true">
 						<div class="front">
 							<b>Shuffling</b>
 						</div>
@@ -286,7 +276,7 @@
 							<b class="label hide">Tap To Hide</b>
 						</div>
 					</div>
-					<div class="chit" data-id="1" data-clickable="false">
+					<div class="chit" data-id="1" data-clickable="true">
 						<div class="front">
 							<b>Shuffling</b>
 						</div>
@@ -299,7 +289,7 @@
 							<b class="label hide">Tap To Hide</b>
 						</div>
 					</div>
-					<div class="chit" data-id="2" data-clickable="false">
+					<div class="chit" data-id="2" data-clickable="true">
 						<div class="front">
 							<b>Shuffling</b>
 						</div>
@@ -312,7 +302,7 @@
 							<b class="label hide">Tap To Hide</b>
 						</div>
 					</div>
-					<div class="chit" data-id="3" data-clickable="false">
+					<div class="chit" data-id="3" data-clickable="true">
 						<div class="front">
 							<b>Shuffling</b>
 						</div>
@@ -327,8 +317,9 @@
 					</div>
 				</div>
 				<div class="plrs down" style="--dir: -1">
-					<div class="plr left">
+					<div data-assigned="no" class="plr left">
 						<div class="emoji msg hide"></div>
+						<div class="disc-banner"></div>
 						<b class="name">Player</b>
 						<div class="score">
 							<b class="plus">Leading</b>
@@ -352,7 +343,7 @@
 						</div>
 						<div class="prog-bar"></div>
 					</div>
-					<div class="plr right me">
+					<div data-assigned="yes" class="plr right me">
 						<b class="name">You</b>
 						<div class="score ld">
 							<b class="plus">Leading</b>
@@ -370,8 +361,15 @@
 					</div>
 				</div>
 				<div class="settings">
-					<a class="mode">Mode: Normal</a>
-					<a class="end">Leave</a>
+					<a class="mode unavailable">
+						<img src="/media/unlock.png" alt="Mode Type">
+						<b>Open</b> <!-- Private -->
+					</a>
+					<div class="rounds"><b>Round 1 of 20</b></div>
+					<a class="end">
+						<b>Leave</b>
+						<img src="/media/leave.png" alt="Leave Icon">
+					</a>
 				</div>
 			</div>
 		</div>
@@ -416,9 +414,9 @@
 			</svg>
 		</footer>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/progressbar.js/0.6.1/progressbar.min.js" defer></script>
-		<script src="https://code.jquery.com/jquery-3.6.4.slim.min.js" defer></script>
-		<script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
+		<script src="dist/scripts/progressbar.min.js" defer></script>
+		<script src="dist/scripts/toastify.min.js" defer></script>
+		<script src="dist/scripts/zepto.min.js" defer></script>
 		<script type="module" src="scripts/main.js" defer></script>
 
 		<!-- Icons Store => https://icon-sets.iconify.design/uil/ -->

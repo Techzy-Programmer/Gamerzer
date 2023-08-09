@@ -5,38 +5,29 @@ import { Utils } from "./utils.js";
 import { State } from "./state.js";
 import { Game } from "./game.js";
 
-let targetGCard;
+const rq = JSON.parse(localStorage.getItem("Retry-Queue") ?? "{}");
+const isTestMode = location.protocol === 'http:'
+    && location.search.startsWith('?test');
+const signupBtn = $('#authform #signupBtn');
+const loginBtn = $('#authform #loginBtn');
+State.urlSearch = location.search;
 Utils.replaceState('auth');
+Master.retryQueue = rq;
 Master.connect();
+let targetGCard;
 initTable();
 
-// #region UI Testing ---
+if (isTestMode) {
+    console.log("UI Testing Enabled");
+    const { setUpTesting } = await import('./test.js');
+    setUpTesting(); // Setup test & do UI testing
+}
 
-// (async () => {
-//     UI.setLoader(false);
-//     await UI.loadDashboard();
-//     await wait(200);
-
-//     // Simulating server for testing
-//     State.activeGCode = 'rmcs';
-//     const testMSG = {
-//         msg: 'Goto-Game',
-//         data: {
-//             plrIds: [ 2, 5, 1 ]
-//         }
-//     };
-
-//     await Game.processMSG(testMSG);
-//     $('#rmcs .chit').click(function() {
-//         $(this).eq(0).toggleClass('active');
-//     });
-// })();
-
-// Comment above code when UI testing done.....
-// #endregion
-
-$('#signupBtn').click(async (e) => {
+signupBtn.on("click", async function(e) {
     e.preventDefault();
+    if ($(this).attr('disabled')) return;
+    $(this).attr('disabled', 'true');
+
     let name = $('#sname').val(),
         pass = $('#spass').val(),
         email = $('#semail').val(),
@@ -53,8 +44,11 @@ $('#signupBtn').click(async (e) => {
     });
 });
 
-$('#loginBtn').click(async (e) => {
+loginBtn.on("click", async function(e) {
     e.preventDefault();
+    if ($(this).attr('disabled')) return;
+    $(this).attr('disabled', 'true');
+
     let pass = $('#lpass').val(),
         email = $('#lemail').val();
 
@@ -62,9 +56,31 @@ $('#loginBtn').click(async (e) => {
     await wait(500);
     
     Master.send('Login', {
+        queue: Master.retryQueue,
         email,
         pass
     });
+});
+
+$('#authform input.input-tb, #authform .btn').keypress(function(e) {
+    if (e.which === 13) { // Enter(Return) button
+        e.preventDefault();
+        const nameAttr = $(this).attr('name');
+        if (nameAttr == "lpass") loginBtn.click();
+        else if (nameAttr == "saccess") signupBtn.click();
+    }
+});
+
+$('#authform .btn').keypress(function(e) {
+    if (e.which === 13) { // Enter(Return) button
+        e.preventDefault();
+        $(this).click();
+    }
+});
+
+$('#authform h6 > span').click(function() {
+    const cbaf = $('#authform input[type="checkbox"]')[0];
+    cbaf.checked = !this.classList.contains('l');
 });
 
 $('#dash .top-bar .logout').click(async (e) => {
@@ -80,15 +96,6 @@ $('#dash .top-bar .logout').click(async (e) => {
     await UI.loadAuth();
     await wait(1000);
     location.reload();
-});
-
-$('#authform input.form-style').keypress(function(e) {
-    if (e.which === 13) { // Enter button
-        e.preventDefault();
-        const nameAttr = $(this).attr('name');
-        if (nameAttr == "lpass") $('#loginBtn').click();
-        else if (nameAttr == "saccess") $('#signupBtn').click();
-    }
 });
 
 $('#dash .games > .gcard').click(async e => {
@@ -166,15 +173,17 @@ window.addEventListener('popstate', async (ev) => {
         await wait(1000);
         loadMatching();
     }
-    else if (idf == 'game-quit' && !fwd) {
+    else if (idf == 'game-quit' && !fwd && State.me.status === 'playing') {
         Utils.setModalOpt(); // Reset back the modal props
         const confRes = await Utils.showGetModal("Quit the Game?",
             "Are you sure to Quit the ongoing game? you may lose the game and progress!", "Quit", "Cancel");
         if (confRes.accepted) Game.quit();
         else window.history.forward();
     }
-    else if (idf.startsWith('game-') && State.me.status !== 'playing') {
+    
+    if (idf.startsWith('game-') && State.me.status !== 'playing' && !fwd) {
         UI.showToast("Unable to join the previous game!", 'e');
+        window.history.forward();
         // Utils.replaceState(State.navState);
     }
 

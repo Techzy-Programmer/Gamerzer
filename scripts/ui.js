@@ -12,9 +12,15 @@ let sceneMap = {
 }
 
 export class UI {
+    static sameScene(scn) {
+        let condt = scn === activeScene;
+        if (condt) this.setLoader(false);
+        return condt;
+    }
+
     static async loadAuth() {
         const scene = 0;
-        if (scene == activeScene) return;
+        if (this.sameScene(scene)) return;
         
         await hideScene();
         await showScene(scene);
@@ -23,8 +29,8 @@ export class UI {
 
     static async loadDashboard(prevPush = false) {
         const scene = 1;
-        if (scene == activeScene) return;
-        
+        if (this.sameScene(scene)) return;
+                
         await hideScene();
         await showScene(scene);
         if (!prevPush) Utils.pushState('dashboard');
@@ -32,8 +38,8 @@ export class UI {
 
     static async loadLobby() {
         const scene = 2;
-        if (scene == activeScene) return;
-        
+        if (this.sameScene(scene)) return;
+
         await hideScene();
         await showScene(scene);
         this.setLoader(false);
@@ -80,16 +86,18 @@ export class UI {
     static async populateLobby(ids) {
         let i = 0;
         ids.forEach(async id => {
-            const newUserEl = $('<b/>', { 'class': id });
+            const newUserEl = $('<b/>', { 'class': `p-${id}` });
             newUserEl.text(State.players[id].name);
             $('#lobby .players').append(newUserEl);
-            await wait((i++) * 300);
-            await wait(20);
+            await wait((i++) * 300); await wait(20);
             newUserEl.addClass('show');
         });
     }
 
     static setLoader(toShow, ownerToken = "n/a") {
+        if (this.getScene() === 0 && !toShow)
+            $('#authform a[disabled="true"]').removeAttr('disabled');
+
         // ownerToken verifies if caller has enough rights to close the loader
         if (toShow) loaderToken = ownerToken;
         else {

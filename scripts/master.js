@@ -11,9 +11,12 @@ let isRetryDisabled = false;
 let isDisconnected = true;
 let hasNotified = false;
 let pingIOut = 0;
+let fsId = 0;
 let svr;
 
 export class Master {
+    static retryQueue = {};
+
     static connect() {
         if (!isDisconnected) return;
         let svrAddress = isProd ? productionSvr : localSvr;
@@ -22,8 +25,14 @@ export class Master {
         svr.addEventListener('open', () => {
             UI.showToast('Connected to the server');
             const sess = localStorage.getItem('User-Session');
-            if (sess != null) this.send("Login", { sess });
+
+            if (sess != null)
+                this.send("Login", {
+                    queue: this.retryQueue,
+                    sess
+                });
             else UI.setLoader(false);
+
             isDisconnected = false;
             hasNotified = false;
 
@@ -41,23 +50,19 @@ export class Master {
             switch (msg.type) {
                 case 'Logged-In':
                     data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
-                    const tokStr = localStorage.getItem('RMCS-Respawn-Token');
-                    localStorage.setItem('User-Session', data.session);
-                    State.me = new Player(data.id, data.name, 'idle');
+                    State.me = new Player(data.id, data.name, 'idle', true);
                     $('#dash .top-bar .name b').text(data.name);
+                    State.me.setSession(data.session);
                     Utils.nullifyNav('dashboard');
                     State.loggedIn = true;
                     
-                    if (tokStr && tokStr.includes('@')) {
-                        const [tokData, tokTime] = tokStr.split('@');
-                        const tokTimeInt = parseInt(tokTime); // To Int
-                        const mins = (Date.now() - tokTimeInt) / (60 * 1000);
-                        
-                        if (tokData.length === 64 && mins < 5) {
-                            // ToDo: Implement player respawning
-                            // return; // Make sure to break here
-                        }
-                    }
+                    data.parsedQueueItems.forEach(qi => {
+                        if (qi in this.retryQueue)
+                            delete this.retryQueue[qi];
+                    });
+                    
+                    localStorage.setItem('Retry-Queue',
+                        JSON.stringify(this.retryQueue));
 
                     if (UI.getScene() === 0) {
                         UI.showToast(`Welcome ${data.name}`);
@@ -65,6 +70,24 @@ export class Master {
                         await UI.loadDashboard(true);
                     }
 
+                    await wait(250);
+
+                    if (data.respawned && data.wasPlaying) {
+                        Utils.setModalOpt(); // Reset the modal box to Query mode
+                        let confRspPromise = Utils.showGetModal("Join Previous Game?", // Ask user for re-join
+                            `You were playing "${data.gname}" & got disconnected abruptly! Would you like to re-join?`, 'Yes', 'No');
+                        const toReJoin = window.location.pathname.startsWith('/game-') || (await confRspPromise).accepted;
+
+                        if (toReJoin) {
+                            UI.setLoader(true);
+                            await wait(500); //--
+                            State.activeGCode = data.gcode;
+                            Game.send("Respawn-Me", { srf: data.respawnFactor });
+                            return;
+                        }
+                        else Game.quit(false, data.respawnFactor, true);
+                    }
+                    
                     UI.setLoader(false);
                     break;
 
@@ -75,7 +98,8 @@ export class Master {
 
                 case 'Left':
                     if (data.id in State.players) {
-                        if (State.me.status !== 'playing') UI.showToast(`${State.players[data.id].name} Left`, 'w');
+                        if (State.me.status !== 'playing')
+                            UI.showToast(`${State.players[data.id].name} Left`, 'w');
                         delete State.players[data.id];
                     }
                     break;
@@ -89,6 +113,7 @@ export class Master {
 
                 case 'Goto-Lobby':
                     State.hasLobbyInit = false;
+                    $('#lobby > button').css('display', 'block');
                     await UI.loadLobby(); // Loader get closed by this function itself
                     break;
 
@@ -101,7 +126,7 @@ export class Master {
                     break;
 
                 case 'Match-Making-Left':
-                    const remPlrElem = $(`#lobby .players > b.show.${data.id}`);
+                    const remPlrElem = $(`#lobby .players > b.show.p-${data.id}`);
                     remPlrElem.removeClass('show');
                     await wait(340);
                     remPlrElem.remove();
@@ -126,9 +151,6 @@ export class Master {
                     UI.showToast('Session opened in another tab', 'w', 0);
                     break;
 
-                case 'Pong':
-                    break;
-
                 case 'Blocked':
                     UI.showToast("You are blocked by Admin!", 'w');
                     localStorage.clear();
@@ -141,10 +163,8 @@ export class Master {
                 case 'Warn': case 'Error':
                     UI.setLoader(false); // Disable active loader
                     UI.showToast(msg.data, msg.type[0].toLowerCase()); // Display toast message
-
-                    if (msg.data.includes('Session expired!')) {
+                    if (msg.data.includes('Session expired!'))
                         localStorage.removeItem("User-Session");
-                    }
                     break;
             }
         });
@@ -153,15 +173,26 @@ export class Master {
         svr.addEventListener('error', async () => onDisconnection(1));
     }
 
-    static send(type, data) {
+    static send(type, data, failSafe = false) {
         if (!svr || svr.readyState !== 1) {
-          UI.showToast("Something went wrong :(");
-          UI.setLoader(false);
-          return;
+            if (failSafe) {
+                this.retryQueue[`fs-${fsId++}`] = {
+                    failSafe,
+                    type,
+                    data
+                };
+
+                localStorage.setItem("Retry-Queue",
+                    JSON.stringify(this.retryQueue));
+            }
+            else UI.showToast("Something went wrong :(");
+            UI.setLoader(false);
+            return false;
         }
     
         const msg = { type, data };
         svr.send(JSON.stringify(msg));
+        return true;
     }
 }
 
@@ -174,9 +205,12 @@ async function checkOnline() {
         if (isRetryDisabled) return false;
 
         if ((caught || !navigator.onLine) && !notified) {
-            dispToast = UI.showToast('Waiting for Internet connection...', 'w', 0, false);
-            UI.setLoader(true);
             notified = true;
+            
+            if (State.me.status !== 'playing') {
+                dispToast = UI.showToast('Waiting for Internet connection...', 'w', 0, false);
+                UI.setLoader(true);
+            }
         }
 
         try {
@@ -185,6 +219,8 @@ async function checkOnline() {
             const signal = fetchController.signal;
             setTimeout(() => fetchController.abort(), 2000);
             await fetch('./media/ping.png', { cache: 'no-store', signal });
+            if (typeof State.curGame?.handleNetStatus === 'function')
+                State.curGame.handleNetStatus(true);
             dispToast?.hideToast();
             return true;
         }
@@ -197,6 +233,7 @@ async function checkOnline() {
 
 async function onDisconnection(popType) {
     if (!hasNotified) {
+        if (typeof State.curGame?.handleNetStatus === 'function') State.curGame.handleNetStatus(false);
         if (popType == 0) UI.showToast("Disconnected from server!", 'e');
         else UI.showToast("Error connecting to server!", 'e');
         if (UI.getScene() == 2) await UI.loadDashboard();

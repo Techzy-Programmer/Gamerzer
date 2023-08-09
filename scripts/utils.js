@@ -1,15 +1,17 @@
 import { State } from "./state.js";
 
 const navHistory = ['null'];
+let mdlAccept = 'text';
 let navPos = 0;
 let navDir = 1;
 
 export class Utils {
-    static setModalOpt(type = 'q') {
+    static setModalOpt(type = 'q', accept = 'text') {
         const mdlBtnF = $('.modal-bx button.f');
         const mdlImg = $('.modal-bx img');
         mdlBtnF.css('display', 'none');
         let rt = '/media/alert/';
+        mdlAccept = accept;
 
         switch (type) {
             case 'q':
@@ -62,7 +64,7 @@ export class Utils {
     }
 
     static getNth(num) {
-        return ["st","nd","rd"]
+        return ["st", "nd", "rd"]
             [(((num < 0 ? -num : num) + 90)
                 % 100 - 10) % 10 - 1] || "th"
     }
@@ -78,7 +80,7 @@ export class Utils {
             identifier: state,
             dir: newDir,
             extras: data
-        }, null, `${state}`);
+        }, null, `${state}${State.urlSearch}`);
 
         State.navState = state;
     }
@@ -91,7 +93,7 @@ export class Utils {
             identifier: state,
             extras: data,
             dir: newDir
-        }, null, `${state}`);
+        }, null, `${state}${State.urlSearch}`);
 
         navHistory[navPos] = state;
         State.navState = state;

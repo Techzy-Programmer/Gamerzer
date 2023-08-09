@@ -2,8 +2,10 @@ import { Game } from "./game.js";
 import { State } from "./state.js";
 import { Player } from "./player.js";
 import { UI, wait } from "./ui.js";
+import { Utils } from "./utils.js";
 
-const rootEl = $('#rmcs');
+let prevStatusTxt = '';
+const rootEl = $('#sandwich > #rmcs');
 
 export class RMCS extends Game {
     name = "Raja Mantri Chor Sipahi";
@@ -12,9 +14,11 @@ export class RMCS extends Game {
     isMsgAnim = false;
     exitIVal = false;
     myPersona = '-';
+    sipahiId = '';
     rounds = 1;
+    tIRE = 0;
 
-    constructor(playerLst) {
+    constructor(playerLst, srf = null) {
         super();
         this.uiTimers = { };
         this.players = playerLst;
@@ -25,25 +29,39 @@ export class RMCS extends Game {
         }
 
         this.setCard = (el, plrName, plrId) => {
-            $(el).attr('id', `rmcs-${plrId}`);
-            $(el).find('b.pts').text('0 pts');
-            $(el).find('b.name').text(plrName);
-            $(el).find('.score').removeClass('ld');
-            let progBarDiv = $(el).find('.prog-bar')[0];
-            let tmrTxtDiv = $(el).find('.tool b.timer')[0];
+            const profileCard = $(el);
+            profileCard.attr('id', `rmcs-${plrId}`);
+            profileCard.find('b.pts').text('0 pts');
+            profileCard.attr('data-assigned', 'yes');
+            profileCard.find('b.name').text(plrName);
+            profileCard.find('.score').removeClass('ld');
+            let progBarDiv = profileCard.find('.prog-bar')[0];
+            let tmrTxtDiv = profileCard.find('.tool b.timer')[0];
             const timer = initProgressBar(progBarDiv, tmrTxtDiv);
-            this.uiTimers[plrId] = { startTmr: timer[0], resetTmr: timer[1], correctTmr: timer[2] };
+            this.uiTimers[plrId] = {
+                startTmr: timer[0],
+                pauseTmr: timer[1],
+                correctTmr: timer[2],
+                resetTmr: timer[3],
+            };
         };
 
-        this.initialize();
+        this.initialize(srf);
     }
 
-    handleClicks(jqEl, type) {
+    async handleClicks(jqEl, type) {
         switch (type) {
             case 'chit':
-                if (jqEl.attr('data-clickable') == 'true') {
-                    if (this.chitChosen) jqEl.toggleClass('active');
-                    else Game.send('Chit-Id', { chitId: Number.parseInt(jqEl.attr('data-id')) });
+                if (jqEl.attr('data-clickable') === 'true') {
+                    if (this.chitChosen) {
+                        if (jqEl.hasClass('me'))
+                            jqEl.toggleClass('active')
+                        return;
+                    }
+                    
+                    Game.send('Chit-Id', {
+                        chitId: parseInt(jqEl.attr('data-id'))
+                    });
                 }
                 break;
 
@@ -51,7 +69,7 @@ export class RMCS extends Game {
                 if (jqEl.hasClass('active') && this.myPersona == 's') {
                     const plrId = jqEl.parent().parent().attr('id');
                     $('#rmcs .plrs .plr .tool > a').removeClass('active');
-                    Game.send('Selection', { selPlrId: Number.parseInt(plrId.replace('rmcs-', '')) });
+                    Game.send('Selection', { selPlrId: plrId.replace('rmcs-', '') });
                 }
                 break;
 
@@ -60,9 +78,16 @@ export class RMCS extends Game {
                     const plrId = jqEl.parent().parent().attr('id');
                     Game.send('Emoji', {
                         targetEmj: Number.parseInt(jqEl.attr('data-eid')),
-                        targetPlr: Number.parseInt(plrId.replace('rmcs-', ''))
+                        targetPlr: plrId.replace('rmcs-', '')
                     });
                 }
+                break;
+
+            case 'quit':
+                Utils.setModalOpt(); // Reset modal to query mode
+                const confRes = await Utils.showGetModal("Quit the Game?",
+                    "Are you sure to Quit the ongoing game? you may lose the game and progress!", "Quit", "Cancel");
+                if (confRes.accepted) Game.quit();
                 break;
 
             default:
@@ -70,36 +95,67 @@ export class RMCS extends Game {
         }
     }
 
-    async initialize() {
+    async initialize(srf) {
         let elId = 0;
-        UI.setLoader(false);
-        await wait(500);
+        if (srf) Game.halted = true;
         this.changeStatus('rounds');
         registerHandlers(this.handleClicks.bind(this));
         const notMe = $('#rmcs > .plrs .plr:not(.me)');
+        setTimeout(() => Game.send('Ready', { srf }, true), 250);
         this.setCard($('#rmcs > .plrs .plr.me')[0], 'You', State.me.id);
         this.players.forEach(p => this.setCard(notMe[elId++], p.name, p.id));
-        Game.send('Ready');
+        await wait(1500); UI.setLoader(false);
     }
 
     changeStatus(type, defStatus = 'N/A') {
         switch (type) {
+            case 'network': this.uiElems.statusB.text('No Internet, Reconnecting...'); break;
+            case 'disconnection': this.uiElems.statusB.text('Waiting for players to re-join...'); break;
             case 'rounds': this.uiElems.statusB.text(`Starting round ${this.rounds}...`); break;
             case 'chits': this.uiElems.statusB.text(`Waiting for chits to be picked...`); break;
             case 'suspense': this.uiElems.statusB.text(`Suspense Time, Kon hai Chor?`); break;
             case 'shuffle': this.uiElems.statusB.text('Shuffling & randomizing chits...'); break;
             default: this.uiElems.statusB.text(defStatus); break;
         }
+
+        if (this.uiElems.statusB.text().endsWith("..."))
+            this.uiElems.statusB.addClass('anim');
+        else this.uiElems.statusB.removeClass('anim');
     }
 
-    async setupRounds() {
+    setupRounds() {
         const chits = rootEl.find('.chit-box > .chit');
         chits.find('.back .label').addClass('hide');
         chits.find('.front > b').text('Shuffling');
-        chits.attr('data-clickable', 'false');
         chits.removeClass('active me');
         this.chitChosen = false;
         this.myPersona = '-';
+        this.sipahiId = '';
+    }
+
+    runRoundTmr(roundTmr = 14) {
+        this.tIRE = setInterval(() => {
+            if (roundTmr <= 0 || this.exitIVal) {
+                clearInterval(this.tIRE);
+                return;
+            }
+
+            this.changeStatus('-', `Round ${this.rounds} starting in ${--roundTmr} s...`);
+        }, 1000);
+    }
+
+    handleNetStatus(netAvailable) {
+        this.exitIVal = !netAvailable;
+
+        if (!netAvailable) {
+            prevStatusTxt = this.uiElems.statusB.text();
+            this.changeStatus('network');
+            rootEl.addClass('fadeOut');
+            return;
+        }
+
+        this.changeStatus('-', prevStatusTxt);
+        rootEl.removeClass("fadeOut");
     }
 
     async handleServerResp(msg, data) {
@@ -120,19 +176,19 @@ export class RMCS extends Game {
                 break;
 
             case 'Start-Round':
-                if (this.myPersona == 's') data.victims.forEach((pId) => // Enable player selection
-                    rootEl.find(`.plr#rmcs-${pId} .tool > a`).addClass('active'));
-                this.uiTimers[data.sId].startTmr(); // Start timer of sipahi
+                if (this.myPersona === 's') data.victims.forEach((pId) =>
+                    rootEl.find(`.plr#rmcs-${pId} .tool > a`).addClass('active')); // Enable player selection
+                if (this.sipahiId) this.uiTimers[this.sipahiId].startTmr(); // Start timer of sipahi
                 this.changeStatus('suspense');
                 break;
 
             case 'Round-Ends':
                 this.exitIVal = false;
                 this.rounds = data.round;
-                this.uiTimers[data.sId].resetTmr();
-                let roundTmr = data.roundDelaySec - 1;
+                this.runRoundTmr(data.roundDelaySec - 1);
                 rootEl.find(`.plrs .plr .score`).removeClass('ld');
                 rootEl.find('.plrs .plr .tool > a').removeClass('active');
+                if (this.sipahiId) this.uiTimers[this.sipahiId].resetTmr();
                 rootEl.find(`.plrs .plr#rmcs-${data.leadPlr} .score`).addClass('ld');
                 data.plrScores.forEach(scrObj => rootEl.find(`.plrs .plr#rmcs-${scrObj.uId} .score .pts`).text(`${scrObj.uPts} Pts`));
                 
@@ -142,7 +198,7 @@ export class RMCS extends Game {
                 );
 
                 if (this.myPersona === 's') { // Show choice popup only if current player is sipahi
-                    let resTxt = "Well Done! You guess it right";
+                    let resTxt = "Well Done! You guessed it right";
                     let resDiv = $('#sandwich > .alert-bx');
                     resDiv.removeClass('w');
                     resDiv.find('img').attr('src',
@@ -159,15 +215,6 @@ export class RMCS extends Game {
                     resDiv.find('b').text(resTxt);
                     resDiv.addClass('active');
                 }
-
-                const tIRE = setInterval(() => {
-                    if (roundTmr <= 0 || this.exitIVal) {
-                        clearInterval(tIRE);
-                        return;
-                    }
-
-                    this.changeStatus('-', `Round ${this.rounds} starting in ${--roundTmr} s...`);
-                }, 1000);
                 break;
 
             case 'Emoji':
@@ -179,7 +226,6 @@ export class RMCS extends Game {
                     animable.attr('data-eid', `${emjId}`);
                     animable.removeClass('hide');
                     animable.addClass('anim');
-                    console.log(animable);
 
                     const animEndF = () => {
                         animable.removeAttr('data-eid');
@@ -192,15 +238,103 @@ export class RMCS extends Game {
                 }
                 break;
 
+            case "Disconnected":
+                if (!Game.halted)
+                    Game.halted = true;
+                rootEl.addClass("fadeOut");
+                this.changeStatus('disconnection');
+                let sel = `.plrs .plr[data-assigned="no"]`;
+                if (this.tIRE > -1) clearInterval(this.tIRE);
+                if (this.sipahiId) this.uiTimers[this.sipahiId].pauseTmr();
+                let pCard = rootEl.find(`.plrs .plr#rmcs-${data.whoId}`);
+                if (pCard.length === 0) pCard = rootEl.find(sel);
+                pCard.addClass('disconnected');
+                this.tIRE = -1;
+                await wait(1500);
+                UI.setLoader(false);
+                break;
+
+            case "Re-Joined": rootEl.find(`.plrs .plr#rmcs-${data.who}`).removeClass('disconnected'); break;
+
+            case 'Render-Game':
+                let asgCnt = 0;
+                this.setupRounds();
+                rootEl.addClass("fadeOut");
+                this.rounds = data.roundsPlayed;
+                const unAsgndCards = rootEl.find('.plrs .plr[data-assigned="no"]:not(.me)');
+
+                data.scoresData.forEach(sd => {
+                    const rjPlr = State.players[sd.uId];
+                    const isSelf = State.me.id === sd.uId;
+
+                    if (rjPlr && asgCnt < unAsgndCards.length && !this.players.includes(rjPlr) && !isSelf) {
+                        this.setCard(unAsgndCards[asgCnt++], rjPlr.name, rjPlr.id);
+                        this.players.push(rjPlr); // This is of no use still ;)
+                    }
+
+                    const scrDiv = rootEl.find(`.plrs .plr#rmcs-${sd.uId} .score`);
+                    scrDiv.find('b.pts').text(`${sd.uPts} Pts`);
+                    if (sd.leading) scrDiv.addClass('ld');
+                });
+
+                const chitLen = data.chitsData.length;
+                if (chitLen > 0) data.chitsData.forEach(cd =>
+                    setupChit(cd.cId, cd.uId, cd.uPsna, this));
+                
+                if (chitLen < 4 && !this.chitChosen) {
+                    this.uiElems.chitTopB.text('Tap to Reveal');
+                    this.changeStatus('suspense');
+                }
+
+                Game.send('Game-Rendered', {}, true);
+                break;
+
+            case 'Correct-Timer':
+                if (this.sipahiId)
+                    this.uiTimers[this.sipahiId]
+                        .correctTmr(data.sipahiTime - 1);
+                break;
+
+            case 'Re-Start':
+                if (data.roundGoing) {
+                    if (data.allChosen) this.changeStatus('suspense');
+                    else this.changeStatus('chits');
+                }
+                else {
+                    this.runRoundTmr(data.roundDelaySec - 1);
+                    this.chitChosen = true;
+                }
+
+                rootEl.find('.plrs .plr').removeClass('disconnected');
+                UI.showToast("All players joined!");
+                rootEl.removeClass("fadeOut");
+                Game.halted = false;
+                break;
+
+            case 'Game-Ends':
+                // ToDo: Render game result in popup box
+                // ToDo: after getting conf return back to dashboard
+                break;
+
+            case "Quit":
+                UI.showToast(`'${State.players[data.who].name}' ${ data.pQuit ? "refused to join" : "quits the game"}!`);
+                rootEl.find(`.plrs > .plr#rmcs-${data.who}`).addClass('fadeOut');
+                UI.showToast('Declaring game result now...');
+                break;
+
             default: break;
         }
     }
 
     dispose() {
         // Remove event listeners
-        $('#rmcs .chit').off('click');
-        rootEl.find('.emojis > .emoji').off('click');
-        $('#rmcs .plrs .plr .tool > a').off('click');
+        $('#rmcs .chit').off();
+        rootEl.find('.settings > .end').off();
+        rootEl.find('.emojis > .emoji').off();
+        $('#rmcs .plrs .plr .tool > a').off();
+
+        // Reset UI and Designs
+        rootEl.find('.plrs > .plr').removeClass('fadeOut');
 
         // Reset UI timers
         Object.values(this.uiTimers)
@@ -224,11 +358,13 @@ function setupChit(cId, uId, psna, gInst) {
     chit.attr('data-clickable', isMe ? 'true' : 'false');
     populateChit(chit.find('.back > div'), psna);
     chit.addClass(`active ${isMe ? 'me' : ''}`);
+    if (psna === 's') gInst.sipahiId = uId;
     chit.attr('id', `rmcs-chit-${uId}`);
 
     if (isMe) {
         $('#rmcs .chit:not(.me) .front > b').text('To Be Selected');
         chit.find('.back .label').removeClass('hide');
+        chit.find('.front b').text("Tap to Reveal");
         gInst.chitChosen = true;
         gInst.myPersona = psna;
     }
@@ -265,11 +401,13 @@ function populateChit(jqChitDiv, p) {
 
 function registerHandlers(cb) {
     $('#rmcs .chit').click(function() { cb($(this), 'chit') });
+    rootEl.find('.settings > .end').click(function() { cb($(this), 'quit') });
     rootEl.find('.emojis > .emoji').click(function() { cb($(this), 'emoji') });
     $('#rmcs .plrs .plr .tool > a').click(function() { cb($(this), 'selection') });
 }
 
 function initProgressBar(pbDiv, tmrTxt, sec = 60) {
+    // console.log(pbDiv);
     let progBar = new ProgressBar.Line(pbDiv, {
         from: { color: '#ff6fca' },
         to: { color: '#7cfc00' },
@@ -291,22 +429,47 @@ function initProgressBar(pbDiv, tmrTxt, sec = 60) {
         }
     });
 
-    let s;
+    let s = sec;
+    let animIVal = 0;
+    let running = false;
     let toReset = false;
+    const fixedSec = sec;
     const resetTimer = () => toReset = true;
-    const correctTimer = curSec => s = curSec;
+    
+    const pauseTimer = () => {
+        clearInterval(animIVal);
+        running = false;
+        progBar.stop();
+    }
+
+    const correctTimer = curSec => {
+        if (!running) {
+            const delChange = curSec / sec;
+            progBar.set(delChange);
+            sec = curSec;
+        }
+
+        s = curSec;
+    }
 
     function startTimer() {
-        progBar.animate(0);
+        if (running) return;
         toReset = false;
-        s = sec;
+        running = true;
 
-        const animIVal = setInterval(() => {
+        progBar.animate(0, {
+            duration: (sec * 1000)
+        });
+
+        animIVal = setInterval(() => {
             if (toReset || s <= 0) {
+                s = fixedSec;
+                sec = fixedSec;
                 progBar.stop();
+                running = false;
                 clearInterval(animIVal);
-                progBar.animate(1, { duration: 500 });
                 $(tmrTxt).text(`${sec} s`);
+                progBar.animate(1, { duration: 500 });
                 return;
             }
 
@@ -315,5 +478,5 @@ function initProgressBar(pbDiv, tmrTxt, sec = 60) {
     }
 
     progBar.animate(1, { duration: 500 });
-    return [startTimer, resetTimer, correctTimer];
+    return [startTimer, pauseTimer, correctTimer, resetTimer];
 }

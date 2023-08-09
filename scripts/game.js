@@ -1,15 +1,13 @@
 import { UI, wait } from "./ui.js";
-import { Master } from "./master.js";
 import { State } from "./state.js";
+import { Master } from "./master.js";
 
 export class Game {
-    self = State.me;
-    name = "Default";
-
     static pings = null;
     static respawnToken;
     static players = [];
     static ackCB = null;
+    static halted = false;
     static isRunning = false;
 
     static async processMSG(gameMsg) {
@@ -34,19 +32,19 @@ export class Game {
                 State.me.status = 'playing';
                 
                 for (let i = 0; i < data.plrIds.length; i++)
-                    if (data.plrIds[i] !== State.me.id) // Skip self
+                    if (data.plrIds[i] !== State.me.id && State.players[data.plrIds[i]]) // Skip self and do quick-checks
                         plrsLst.push(State.players[data.plrIds[i]]);
 
                 // Lazy module loading to prevent circular dependency
                 switch (State.activeGCode) {
                     case 'rmcs':
                         const { RMCS } = await import("./rmcs.js");
-                        State.curGame = new RMCS(plrsLst);
+                        State.curGame = new RMCS(plrsLst, data.srf);
                         break;
 
                     default: break;
                 }
-
+                
                 await wait(500);
                 await UI.loadGame(State.activeGCode);
                 break;
@@ -88,39 +86,66 @@ export class Game {
                     this.pings = [];
                 }
                 break;
+
+            case 'Quit-Success': // ToDo: Implement it on Server-Side
+                if (typeof State.curGame?.dispose === 'function') State.curGame.dispose();
+                UI.showToast("Previous Game ended!");
+                this.dispose();
+                break;
             
-            // Let the game room handle further communications
-            default: State.curGame?.handleServerResp(msg, data); break;
+            default: // Let the game room handle further communications
+                if (typeof State.curGame?.handleServerResp === 'function')
+                    State.curGame?.handleServerResp(msg, data);
+                break;
         }
     }
 
-    static send(msg, data) {
+    static send(msg, data, pass = false, failSafe = false) {
+        if (this.halted && !pass) {
+            UI.showToast("Game is Paused! ", "w");
+            return false;
+        }
+        
         const gmData = { msg, data }
-        Master.send("Game-MSG", gmData);
+        return Master.send("Game-MSG", gmData, failSafe);
     }
 
-    static async quit(isAbnormal = false) {
-        if (!State.curGame) return;
-        this.send("Quit", { isAbnormal });
+    static quit(isAbnormal = false, srf = '', promptQuit = false) {
         if (isAbnormal) $('div.modal-bx').removeClass('show');
-
+        State.me.status = 'idle';
+        UI.setLoader(true);
+        
+        if (!this.send("Quit", {
+            promptQuit,
+            isAbnormal,
+            srf
+        }, true, true)) {
+            if (typeof State.curGame?.dispose === 'function')
+                State.curGame.dispose();
+            this.dispose();
+        }
+    }
+    
+    static async dispose() { // Must only be called after disposing the running game instance
         // Reset back the state variables
         this.pings = null;
         this.players = [];
         this.ackCB = null;
+        State.curGame = null;
         this.isRunning = false;
         State.me.status = 'idle';
         localStorage.removeItem('RMCS-Respawn-Token');
-
+        
         // Load dashboard UI
-        State.curGame.dispose();
         UI.setLoader(true);
         await wait(500);
         await UI.loadDashboard();
+        UI.setLoader(false); // Done
     }
 }
 
 async function invokeACK() {
+    $('#lobby > button').css('display', 'none');
     await UI.typeLobby("Starting The Game...");
     UI.setLoader(true);
     Game.send("Ack");
