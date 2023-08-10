@@ -5,7 +5,7 @@ import { Utils } from "./utils.js";
 import { State } from "./state.js";
 import { Game } from "./game.js";
 
-const rq = JSON.parse(localStorage.getItem("Retry-Queue") ?? "{}");
+let rq = {}; try { rq = JSON.parse(localStorage.getItem("Retry-Queue") ?? "{}"); } catch { }
 const isTestMode = location.protocol === 'http:'
     && location.search.startsWith('?test');
 const signupBtn = $('#authform #signupBtn');
@@ -18,7 +18,7 @@ let targetGCard;
 initTable();
 
 if (isTestMode) {
-    console.log("UI Testing Enabled");
+    console.info("UI Testing Enabled");
     const { setUpTesting } = await import('./test.js');
     setUpTesting(); // Setup test & do UI testing
 }

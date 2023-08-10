@@ -20,7 +20,8 @@ export class RMCS extends Game {
 
     constructor(playerLst, srf = null) {
         super();
-        this.uiTimers = { };
+        Game.pings = [];
+        this.uiTimers = {};
         this.players = playerLst;
 
         this.uiElems = {
@@ -97,11 +98,11 @@ export class RMCS extends Game {
 
     async initialize(srf) {
         let elId = 0;
+        this.startRejoin(srf);
         if (srf) Game.halted = true;
         this.changeStatus('rounds');
         registerHandlers(this.handleClicks.bind(this));
         const notMe = $('#rmcs > .plrs .plr:not(.me)');
-        setTimeout(() => Game.send('Ready', { srf }, true), 250);
         this.setCard($('#rmcs > .plrs .plr.me')[0], 'You', State.me.id);
         this.players.forEach(p => this.setCard(notMe[elId++], p.name, p.id));
         await wait(1500); UI.setLoader(false);
@@ -109,13 +110,14 @@ export class RMCS extends Game {
 
     changeStatus(type, defStatus = 'N/A') {
         switch (type) {
+            case 'result': this.uiElems.statusB.text('Fetching game result...'); break;
             case 'network': this.uiElems.statusB.text('No Internet, Reconnecting...'); break;
             case 'disconnection': this.uiElems.statusB.text('Waiting for players to re-join...'); break;
             case 'rounds': this.uiElems.statusB.text(`Starting round ${this.rounds}...`); break;
             case 'chits': this.uiElems.statusB.text(`Waiting for chits to be picked...`); break;
             case 'suspense': this.uiElems.statusB.text(`Suspense Time, Kon hai Chor?`); break;
             case 'shuffle': this.uiElems.statusB.text('Shuffling & randomizing chits...'); break;
-            default: this.uiElems.statusB.text(defStatus); break;
+            default: this.uiElems.statusB.html(defStatus); break;
         }
 
         if (this.uiElems.statusB.text().endsWith("..."))
@@ -140,10 +142,11 @@ export class RMCS extends Game {
                 return;
             }
 
-            this.changeStatus('-', `Round ${this.rounds} starting in ${--roundTmr} s...`);
+            this.changeStatus('-', `Round ${this.rounds}<sup>${Utils.getNth(this.rounds)}</sup> starting in ${--roundTmr} s...`);
         }, 1000);
     }
 
+    // [Must be implemented by all game classes]
     handleNetStatus(netAvailable) {
         this.exitIVal = !netAvailable;
 
@@ -158,6 +161,13 @@ export class RMCS extends Game {
         rootEl.removeClass("fadeOut");
     }
 
+    // [Must be implemented by all game classes]
+    startRejoin(srf) {
+        setTimeout(() => 
+            Game.send('Ready',
+            { srf }, true), 250);
+    }
+
     async handleServerResp(msg, data) {
         switch (msg) {
             case 'Pick-Chit':
@@ -169,6 +179,7 @@ export class RMCS extends Game {
             case 'Persona': setupChit(data.cId, data.uId, data.psna, this); break;
             
             case 'New-Round':
+                rootEl.find('.settings > .rounds b').text(`Round ${this.rounds} of 20`);
                 setTimeout(() => Game.send("Ready"), 1200);
                 this.changeStatus('shuffle');
                 this.exitIVal = true;
@@ -261,6 +272,7 @@ export class RMCS extends Game {
                 this.setupRounds();
                 rootEl.addClass("fadeOut");
                 this.rounds = data.roundsPlayed;
+                rootEl.find('.settings > .rounds b').text(`Round ${this.rounds} of 20`);
                 const unAsgndCards = rootEl.find('.plrs .plr[data-assigned="no"]:not(.me)');
 
                 data.scoresData.forEach(sd => {
@@ -296,6 +308,7 @@ export class RMCS extends Game {
                 break;
 
             case 'Re-Start':
+                Game.halted = false;
                 if (data.roundGoing) {
                     if (data.allChosen) this.changeStatus('suspense');
                     else this.changeStatus('chits');
@@ -308,7 +321,6 @@ export class RMCS extends Game {
                 rootEl.find('.plrs .plr').removeClass('disconnected');
                 UI.showToast("All players joined!");
                 rootEl.removeClass("fadeOut");
-                Game.halted = false;
                 break;
 
             case 'Game-Ends':
@@ -320,12 +332,14 @@ export class RMCS extends Game {
                 UI.showToast(`'${State.players[data.who].name}' ${ data.pQuit ? "refused to join" : "quits the game"}!`);
                 rootEl.find(`.plrs > .plr#rmcs-${data.who}`).addClass('fadeOut');
                 UI.showToast('Declaring game result now...');
+                this.changeStatus('result');
                 break;
 
             default: break;
         }
     }
 
+    // [Must be implemented by all game classes]
     dispose() {
         // Remove event listeners
         $('#rmcs .chit').off();
@@ -407,7 +421,6 @@ function registerHandlers(cb) {
 }
 
 function initProgressBar(pbDiv, tmrTxt, sec = 60) {
-    // console.log(pbDiv);
     let progBar = new ProgressBar.Line(pbDiv, {
         from: { color: '#ff6fca' },
         to: { color: '#7cfc00' },

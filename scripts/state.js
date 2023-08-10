@@ -1,6 +1,7 @@
 import { Player } from "./player.js";
 
 export class State {
+    static onGame = false;
     static urlSearch = '';
     static curGame = null;
     static activeGCode = '';

@@ -24,11 +24,17 @@ export class Game {
                 if (State.hasLobbyInit) invokeACK();
                 else this.ackCB = invokeACK;
                 this.isRunning = true;
-                this.pings = [];
                 break;
 
             case 'Goto-Game':
+                if (State.onGame){
+                    if (typeof State.curGame?.startRejoin === 'function')
+                        State.curGame?.startRejoin(data.srf);
+                    return;
+                }
+
                 const plrsLst = [];
+                State.onGame = true;
                 State.me.status = 'playing';
                 
                 for (let i = 0; i < data.plrIds.length; i++)
@@ -67,7 +73,7 @@ export class Game {
                 this.pings?.push(latency);
                 const pgLen = 4;
                 
-                if (this.pings?.length === pgLen) {
+                if (this.pings?.length >= pgLen) {
                     let totalPing = 0, pingClr = 'g', extra = '';
                     for (let i = 0; i < pgLen; i++) totalPing += this.pings[i];
                     let finalPing = parseInt(totalPing / pgLen);
@@ -131,6 +137,7 @@ export class Game {
         this.pings = null;
         this.players = [];
         this.ackCB = null;
+        State.onGame = false;
         State.curGame = null;
         this.isRunning = false;
         State.me.status = 'idle';
