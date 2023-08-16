@@ -7,7 +7,7 @@ import { Game } from "./game.js";
 
 let rq = {}; try { rq = JSON.parse(localStorage.getItem("Retry-Queue") ?? "{}"); } catch { }
 const isTestMode = location.protocol === 'http:'
-    && location.search.startsWith('?test');
+    && location.search.startsWith('?test-');
 const signupBtn = $('#authform #signupBtn');
 const loginBtn = $('#authform #loginBtn');
 State.urlSearch = location.search;
@@ -20,7 +20,7 @@ initTable();
 if (isTestMode) {
     console.info("UI Testing Enabled");
     const { setUpTesting } = await import('./test.js');
-    setUpTesting(); // Setup test & do UI testing
+    setUpTesting(location.search.replace('?test-', ''));
 }
 
 signupBtn.on("click", async function(e) {

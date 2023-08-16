@@ -26,11 +26,12 @@ export class Master {
             UI.showToast('Connected to the server');
             const sess = localStorage.getItem('User-Session');
 
-            if (sess != null)
+            if (sess !== null) {
                 this.send("Login", {
                     queue: this.retryQueue,
                     sess
                 });
+            }
             else UI.setLoader(false);
 
             isDisconnected = false;
@@ -99,7 +100,16 @@ export class Master {
     
                 await wait(250);
     
-                if (data.respawned && data.wasPlaying) {
+                if (data.respawned) {
+                    const srfTok = data.respawnFactor;
+
+                    if (!data.wasPlaying) {
+                        if (State.onGame)
+                            Game.quit(false, srfTok);
+                        else UI.setLoader(false);
+                        return;
+                    }
+
                     Utils.setModalOpt(); // Reset the modal box to Query mode
                     State.me.status = 'playing';
                     let toReJoin = false;
@@ -116,10 +126,10 @@ export class Master {
                             UI.setLoader(true);
                         await wait(500);
                         State.activeGCode = data.gcode;
-                        Game.send("Respawn-Me", { srf: data.respawnFactor }, true);
+                        Game.send("Respawn-Me", { srf: srfTok }, true);
                         return;
                     }
-                    else Game.quit(false, data.respawnFactor, true);
+                    else Game.quit(false, srfTok, true);
                 }
                 
                 UI.setLoader(false);

@@ -24,10 +24,11 @@ export class Game {
                 if (State.hasLobbyInit) invokeACK();
                 else this.ackCB = invokeACK;
                 this.isRunning = true;
+                Game.halted = false;
                 break;
 
             case 'Goto-Game':
-                if (State.onGame){
+                if (State.onGame) {
                     if (typeof State.curGame?.startRejoin === 'function')
                         State.curGame?.startRejoin(data.srf);
                     return;
@@ -152,8 +153,8 @@ export class Game {
 }
 
 async function invokeACK() {
-    $('#lobby > button').css('display', 'none');
-    await UI.typeLobby("Starting The Game...");
+    $('#lobby > button').css('display', 'none'); await wait(500);
+    UI.typeLobby("Starting The Game");
     UI.setLoader(true);
     Game.send("Ack");
 }

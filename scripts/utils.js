@@ -57,8 +57,10 @@ export class Utils {
         const prModal = new Promise(handleModalClicks);
         box.find('button.f').text(nokBtn);
         box.find('button.t').text(okBtn);
+        if (mdlAccept === 'text') 
+            box.find('p').text(msg);
+        else box.find('p').html(msg);
         box.find('h1').text(ttl);
-        box.find('p').text(msg);
         box.addClass('show');
         return prModal;
     }

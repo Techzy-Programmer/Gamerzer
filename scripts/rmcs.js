@@ -13,6 +13,7 @@ export class RMCS extends Game {
     chitChosen = false;
     isMsgAnim = false;
     exitIVal = false;
+    disposed = false;
     myPersona = '-';
     sipahiId = '';
     rounds = 1;
@@ -44,6 +45,7 @@ export class RMCS extends Game {
                 pauseTmr: timer[1],
                 correctTmr: timer[2],
                 resetTmr: timer[3],
+                destroyTmr: timer[4]
             };
         };
 
@@ -51,6 +53,8 @@ export class RMCS extends Game {
     }
 
     async handleClicks(jqEl, type) {
+        if (this.disposed) return;
+
         switch (type) {
             case 'chit':
                 if (jqEl.attr('data-clickable') === 'true') {
@@ -97,6 +101,7 @@ export class RMCS extends Game {
     }
 
     async initialize(srf) {
+        if (this.disposed) return;
         let elId = 0;
         this.startRejoin(srf);
         if (srf) Game.halted = true;
@@ -109,6 +114,8 @@ export class RMCS extends Game {
     }
 
     changeStatus(type, defStatus = 'N/A') {
+        if (this.disposed) return;
+
         switch (type) {
             case 'result': this.uiElems.statusB.text('Fetching game result...'); break;
             case 'network': this.uiElems.statusB.text('No Internet, Reconnecting...'); break;
@@ -125,7 +132,8 @@ export class RMCS extends Game {
         else this.uiElems.statusB.removeClass('anim');
     }
 
-    setupRounds() {
+    resetGameArea() {
+        if (this.disposed) return;
         const chits = rootEl.find('.chit-box > .chit');
         chits.find('.back .label').addClass('hide');
         chits.find('.front > b').text('Shuffling');
@@ -136,6 +144,7 @@ export class RMCS extends Game {
     }
 
     runRoundTmr(roundTmr = 14) {
+        if (this.disposed) return;
         this.tIRE = setInterval(() => {
             if (roundTmr <= 0 || this.exitIVal) {
                 clearInterval(this.tIRE);
@@ -148,6 +157,7 @@ export class RMCS extends Game {
 
     // [Must be implemented by all game classes]
     handleNetStatus(netAvailable) {
+        if (this.disposed) return;
         this.exitIVal = !netAvailable;
 
         if (!netAvailable) {
@@ -159,16 +169,18 @@ export class RMCS extends Game {
 
         this.changeStatus('-', prevStatusTxt);
         rootEl.removeClass("fadeOut");
+        UI.setLoader(false);
     }
 
     // [Must be implemented by all game classes]
     startRejoin(srf) {
-        setTimeout(() => 
-            Game.send('Ready',
-            { srf }, true), 250);
+        if (this.disposed) return;
+        setTimeout(() => Game.send('Ready', { srf }, true), 250);
     }
 
     async handleServerResp(msg, data) {
+        if (this.disposed) return;
+
         switch (msg) {
             case 'Pick-Chit':
                 this.changeStatus('chits');
@@ -183,7 +195,7 @@ export class RMCS extends Game {
                 setTimeout(() => Game.send("Ready"), 1200);
                 this.changeStatus('shuffle');
                 this.exitIVal = true;
-                this.setupRounds();
+                this.resetGameArea();
                 break;
 
             case 'Start-Round':
@@ -269,7 +281,7 @@ export class RMCS extends Game {
 
             case 'Render-Game':
                 let asgCnt = 0;
-                this.setupRounds();
+                this.resetGameArea();
                 rootEl.addClass("fadeOut");
                 this.rounds = data.roundsPlayed;
                 rootEl.find('.settings > .rounds b').text(`Round ${this.rounds} of 20`);
@@ -319,19 +331,50 @@ export class RMCS extends Game {
                 }
 
                 rootEl.find('.plrs .plr').removeClass('disconnected');
-                UI.showToast("All players joined!");
+                UI.showToast("All players re-joined!");
                 rootEl.removeClass("fadeOut");
                 break;
 
             case 'Game-Ends':
-                // ToDo: Render game result in popup box
-                // ToDo: after getting conf return back to dashboard
+                Game.halted = true;
+                await wait(2000);
+                let resultHTMLStr = '';
+                let myResult = { pos: 4, won: false };
+                if (this.tIRE > -1) clearInterval(this.tIRE);
+                if (this.sipahiId) this.uiTimers[this.sipahiId].pauseTmr();
+                const template = '<b>{NAME}</b> {PRN} <b>{POS}<sup>{PS_OP}</sup></b><br>';
+
+                data.result.forEach(plrRes => {
+                    const puId = plrRes.uId,
+                    puPos = plrRes.uPos;
+
+                    if (puId === State.me.id) {
+                        myResult.won = puPos === 1;
+                        myResult.pos = puPos;
+                        return;
+                    }
+
+                    resultHTMLStr += template.replace('{NAME}', State.players[puId].name).replace('{PRN}', 'is')
+                        .replace('{POS}', puPos).replace('{PS_OP}', Utils.getNth(puPos));
+                });
+
+                resultHTMLStr = template.replace('{NAME}', 'You').replace('{PRN}', 'are').replace('{POS}', myResult.pos)
+                    .replace('{PS_OP}', Utils.getNth(myResult.pos)) + resultHTMLStr;
+
+                Utils.setModalOpt(myResult.won ? 'v' : 'd', 'html'); // Set modal to result mode
+                
+                try {
+                    await Utils.showGetModal(myResult.won ? 'Victory' : 'Defeat', resultHTMLStr,
+                    myResult.won ? 'Keep It Up' : 'Keep Fighting');
+                } catch {}
+                
+                this.dispose(); // Dispose UI & Game session
+                Game.dispose(); // Clear & Out
                 break;
 
             case "Quit":
                 UI.showToast(`'${State.players[data.who].name}' ${ data.pQuit ? "refused to join" : "quits the game"}!`);
                 rootEl.find(`.plrs > .plr#rmcs-${data.who}`).addClass('fadeOut');
-                UI.showToast('Declaring game result now...');
                 this.changeStatus('result');
                 break;
 
@@ -340,24 +383,28 @@ export class RMCS extends Game {
     }
 
     // [Must be implemented by all game classes]
-    dispose() {
+    dispose() {        
         // Remove event listeners
         $('#rmcs .chit').off();
         rootEl.find('.settings > .end').off();
         rootEl.find('.emojis > .emoji').off();
         $('#rmcs .plrs .plr .tool > a').off();
 
-        // Reset UI and Designs
-        rootEl.find('.plrs > .plr').removeClass('fadeOut');
-
-        // Reset UI timers
+        // Dispose UI timers
         Object.values(this.uiTimers)
-            .forEach(t => t.resetTmr());
+            .forEach(t => t.destroyTmr());
+        
+        // Reset UI and Designs
+        this.resetGameArea();
+        rootEl.removeClass('fadeOut');
+        $('.plrs > .plr').removeClass('disconnected');
+        rootEl.find('.plrs > .plr').removeClass('fadeOut');
     
         // Nullify references to DOM elements
         this.chitChosen = false;
         this.isMsgAnim = false;
         this.exitIVal = false;
+        this.disposed = true;
         this.myPersona = '-';
         this.uiTimers = {};
         this.uiElems = {};
@@ -448,7 +495,8 @@ function initProgressBar(pbDiv, tmrTxt, sec = 60) {
     let toReset = false;
     const fixedSec = sec;
     const resetTimer = () => toReset = true;
-    
+    const destroyTimer = () => progBar.destroy();
+
     const pauseTimer = () => {
         clearInterval(animIVal);
         running = false;
@@ -491,5 +539,5 @@ function initProgressBar(pbDiv, tmrTxt, sec = 60) {
     }
 
     progBar.animate(1, { duration: 500 });
-    return [startTimer, pauseTimer, correctTimer, resetTimer];
+    return [startTimer, pauseTimer, correctTimer, resetTimer, destroyTimer];
 }

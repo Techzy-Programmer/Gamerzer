@@ -4,6 +4,8 @@ import { Utils } from "./utils.js";
 
 let loaderToken = "n/a";
 let activeScene = 0;
+let typerID = -1;
+
 let sceneMap = {
     0: $('div#sandwich > #authform'),
     1: $('div#sandwich > #dash'),
@@ -46,7 +48,7 @@ export class UI {
         await wait(400);
         Utils.pushState('lobby');
         State.me.status = 'searching';
-        await this.typeLobby("Searching For Players");
+        this.typeLobby("Searching For Players");
 
         State.hasLobbyInit = true;
         if (typeof Game.ackCB == 'function') {
@@ -55,16 +57,22 @@ export class UI {
         }
     }
 
-    static async typeLobby(typeTxt) {
+    static typeLobby(typeTxt) {
         const schTxt = sceneMap[2].find('.text');
+        cancelAnimationFrame(typerID);
         let tmpTxt = "";
+        let i = 0;
 
-        for (let i = 0; i < typeTxt.length; i++) {
+        async function startTyping() {
             const typeChar = typeTxt[i];
             tmpTxt += typeChar;
             schTxt.text(tmpTxt);
-            await wait(40);
+            await wait(20); i++;
+            if (i >= typeTxt.length) return;
+            typerID = requestAnimationFrame(startTyping);
         }
+
+        typerID = requestAnimationFrame(startTyping);
     }
 
     static async loadGame(gcode) {
@@ -162,8 +170,17 @@ export class UI {
 }
 
 export function wait(millis) {
-    return new Promise(resolve =>
-        setTimeout(resolve, millis));
+    return new Promise(resolve => {
+        const start = performance.now();
+
+        function tick(timestamp) {
+            const elapsed = timestamp - start;
+            if (elapsed >= millis) resolve();
+            else requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+    });
 }
 
 async function hideScene() {
