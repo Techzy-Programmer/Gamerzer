@@ -99,6 +99,12 @@ $('#dash .top-bar .logout').click(async (e) => {
 });
 
 $('#dash .games > .gcard').click(async e => {
+    if (e.currentTarget.classList.contains('disabled')) {
+        Utils.setModalOpt('i'); // Set the modal box to information mode
+        Utils.showGetModal('Unavailable', 'This game is not yet available, we will implement it soon!', "Okay");
+        return;
+    }
+
     targetGCard = $(e.currentTarget);
     loadMatching();
 });
@@ -174,7 +180,6 @@ window.addEventListener('popstate', async (ev) => {
         loadMatching();
     }
     else if (idf == 'game-quit' && !fwd && State.me.status === 'playing') {
-        Utils.setModalOpt(); // Reset back the modal props
         const confRes = await Utils.showGetModal("Quit the Game?",
             "Are you sure to Quit the ongoing game? you may lose the game and progress!", "Quit", "Cancel");
         if (confRes.accepted) Game.quit();

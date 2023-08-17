@@ -10,8 +10,9 @@ export async function setUpTesting(param) {
         case 'dash': await UI.loadDashboard(); break;
 
         case 'modal':
-            Utils.showGetModal("Sample query asked?",
-                `This is a sample description text for the Query or Statement`, 'Okay', 'Good');
+            Utils.setModalOpt('i');
+            await Utils.showGetModal("Information", "This is a piece of custom information", "Cool");
+            await Utils.showGetModal("Sample query asked?", `This is a sample description text for the Query or Statement`, 'Okay', 'Good');
             break;
 
         case 'rmcs':

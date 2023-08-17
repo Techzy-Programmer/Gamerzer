@@ -805,6 +805,12 @@ body > header.sticky .subhead .author
 	box-shadow: 0 5px 1px #fffc, inset 0 -5px 5px rgb(196 59 255 / 25%), 0 10px 0 rgb(0 0 0 / 15%), -6px -4px 10px -2px var(--gc-bs);
 }
 
+#dash .gcard.disabled {
+	cursor: not-allowed !important;
+	transform: skew(0) scale(0.92) !important;
+	filter: grayscale(0.82) brightness(0.4) opacity(0.8) !important;	
+}
+
 #dash .gcard::before {
 	content: '';
 	position: absolute;
@@ -838,7 +844,7 @@ body > header.sticky .subhead .author
 	border-bottom-right-radius: 50%;
 }
 
-#dash .gcard:hover{
+#dash .gcard:not(.disabled):hover{
 	transform: skew(0deg, 0deg);
 }
 

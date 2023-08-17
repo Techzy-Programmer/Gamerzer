@@ -80,10 +80,18 @@ export class Master {
                 data.players.forEach(p => State.players[p.id] = new Player(p.id, p.name, p.status));
                 State.me = new Player(data.id, data.name, 'idle', true);
                 $('#dash .top-bar .name b').text(data.name);
+                const gcards = $('#dash div.gcard');
                 State.me.setSession(data.session);
                 Utils.nullifyNav('dashboard');
                 State.loggedIn = true;
                 
+                for (let i = 0; i < gcards.length; i++) {
+                    const gcard = gcards.eq(i); // this retrieves element in jquery's fashion
+                    const gcardCode = gcard.attr('data-gcode');
+                    if (!data.playables.includes(gcardCode))
+                        gcard.addClass('disabled');
+                }
+
                 data.parsedQueueItems.forEach(qi => {
                     if (qi in this.retryQueue)
                         delete this.retryQueue[qi];
@@ -110,7 +118,6 @@ export class Master {
                         return;
                     }
 
-                    Utils.setModalOpt(); // Reset the modal box to Query mode
                     State.me.status = 'playing';
                     let toReJoin = false;
 

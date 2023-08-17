@@ -89,7 +89,6 @@ export class RMCS extends Game {
                 break;
 
             case 'quit':
-                Utils.setModalOpt(); // Reset modal to query mode
                 const confRes = await Utils.showGetModal("Quit the Game?",
                     "Are you sure to Quit the ongoing game? you may lose the game and progress!", "Quit", "Cancel");
                 if (confRes.accepted) Game.quit();

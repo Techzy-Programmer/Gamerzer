@@ -19,6 +19,7 @@ export class Utils {
                 mdlBtnF.css('display', 'unset');
                 break;
             
+            case 'i': mdlImg.attr('src', `${rt}info.png`); break;
             case 'v': mdlImg.attr('src', `${rt}victory.png`); break;
             case 'd': mdlImg.attr('src', `${rt}defeat.png`); break;
         }
@@ -37,6 +38,7 @@ export class Utils {
             const ival = setInterval(() => {
                 if (!box.hasClass('show')) {
                     clearInterval(ival);
+                    Utils.setModalOpt();
                     prevented = true;
                     reject();
                 }
@@ -47,6 +49,7 @@ export class Utils {
                 resObj.accepted = accepted;
                 box.removeClass('show');
                 clearInterval(ival);
+                Utils.setModalOpt();
                 resolve(resObj);
             }
 
