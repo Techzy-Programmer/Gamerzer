@@ -11,7 +11,7 @@ export async function setUpTesting(param) {
 
         case 'modal':
             Utils.setModalOpt('i');
-            await Utils.showGetModal("Information", "This is a piece of custom information", "Cool");
+            await Utils.showGetModal("Information", "This is a piece of custom information", "Cool"); await wait(1000);
             await Utils.showGetModal("Sample query asked?", `This is a sample description text for the Query or Statement`, 'Okay', 'Good');
             break;
 

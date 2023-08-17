@@ -2,16 +2,19 @@ import { State } from "./state.js";
 
 const navHistory = ['null'];
 let mdlAccept = 'text';
+let modalResetTok = 0;
 let navPos = 0;
 let navDir = 1;
 
 export class Utils {
-    static setModalOpt(type = 'q', accept = 'text') {
+    static setModalOpt(type = 'q', accept = 'text', rtok = 0) {
+        if (rtok !== modalResetTok) return;
         const mdlBtnF = $('.modal-bx button.f');
         const mdlImg = $('.modal-bx img');
         mdlBtnF.css('display', 'none');
         let rt = '/media/alert/';
         mdlAccept = accept;
+        modalResetTok = 0;
 
         switch (type) {
             case 'q':
@@ -38,8 +41,8 @@ export class Utils {
             const ival = setInterval(() => {
                 if (!box.hasClass('show')) {
                     clearInterval(ival);
-                    Utils.setModalOpt();
                     prevented = true;
+                    resetModal();
                     reject();
                 }
             }, 2000);
@@ -49,8 +52,8 @@ export class Utils {
                 resObj.accepted = accepted;
                 box.removeClass('show');
                 clearInterval(ival);
-                Utils.setModalOpt();
                 resolve(resObj);
+                resetModal();
             }
 
             box.find('button.t').one('click', () => resolver(true));
@@ -149,4 +152,9 @@ export class Utils {
 
     // #endregion
     // #endregion
+}
+
+function resetModal() {
+    modalResetTok = parseInt(Math.random() * 10000);
+    setTimeout((tok) => Utils.setModalOpt('q', 'text', tok), 320, (modalResetTok));
 }
