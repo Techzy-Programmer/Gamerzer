@@ -6,7 +6,7 @@ import { Utils } from "./utils.js";
 
 const isProd = window.location.protocol === 'https:';
 const localSvr = `ws://${location.hostname}:8844`;
-const productionSvr = 'wss://107.175.74.38:8844';
+const productionSvr = 'wss://gsvr.040203.xyz';
 let isRetryDisabled = false;
 let isDisconnected = true;
 let hasNotified = false;
